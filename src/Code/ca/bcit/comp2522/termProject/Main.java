@@ -90,10 +90,10 @@ class Main
 
             //todo switch for game choice
 
-            switch (userChoice)
+            switch (userChoice.toLowerCase())
             {
                 case WORD_GAME -> {
-                    //todo do word game
+                    WordGame.playWordGame();
                 }
                 case NUMBER_GAME -> {
                     //todo do number game
