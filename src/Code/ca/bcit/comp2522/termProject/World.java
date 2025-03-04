@@ -17,13 +17,19 @@ class World
                                     's', 't', 'u', 'v', 'y', 'z'
     };
 
+    private static final int COUNTRY_INDEX = 0;
+    private static final int CAPITAL_INDEX = 1;
+    private static final int FACTS_PER_COUNTRY = 3;
+    private static final int FIRST_FACT_INDEX = 0;
+    private static final int SECOND_FACT_INDEX = 1;
+    private static final int THIRD_FACT_INDEX = 2;
+
     private static Map<String, Country> countries;
 
     static
     {
         countries = new HashMap<>();
 
-        //todo figure out how to get rid of this error
         try
         {
             fillCountiesIntoMap(countries);
@@ -32,10 +38,7 @@ class World
         {
             System.out.println("ERROR!!! FILE NOT FOUND: " + ex);
         }
-
     }
-
-    //todo create a method to get all the data and store in hashmap
 
     private static void fillCountiesIntoMap(final Map<String, Country> countries)
             throws FileNotFoundException
@@ -45,37 +48,45 @@ class World
             final Scanner fileScanner;
             final String fileName;
 
-            fileName = file + ".txt";
+            fileName = "src/resources/" + file + ".txt";
 
             fileScanner = new Scanner(new File(fileName));
 
             while (fileScanner.hasNext())
             {
-                final String line;
-                //final Scanner lineScanner;
+                final String countryAndCapitalOrBlank;
 
-                line = fileScanner.nextLine();
-//                lineScanner = new Scanner(line);
-//
-//                if (line.contains(":"))
-//                {
-//                    lineScanner.useDelimiter(":");
-//                }
+                countryAndCapitalOrBlank= fileScanner.nextLine();
 
-                if (line.isBlank())
+                if (countryAndCapitalOrBlank.isBlank())
                 {
                     continue;
                 }
-                else if (line.contains(":"))
-                {
-                    final String[] countryAndCapital;
-                    countryAndCapital = line.split(":");
-                    //todo I now have the country and cap
-                }
-                else
-                {
-                    //todo it is a clue thing
-                }
+
+                final String[] countryAndCapital;
+                final String[] facts;
+                final String countryName;
+                final String countryCapital;
+                final String countryFact1;
+                final String countryFact2;
+                final String countryFact3;
+                final Country countryToAdd;
+
+                countryAndCapital = countryAndCapitalOrBlank.split(":");
+                countryName = countryAndCapital[COUNTRY_INDEX];
+                countryCapital = countryAndCapital[CAPITAL_INDEX];
+
+                countryFact1 = fileScanner.nextLine();
+                countryFact2 = fileScanner.nextLine();
+                countryFact3 = fileScanner.nextLine();
+                facts = new String[FACTS_PER_COUNTRY];
+                facts[FIRST_FACT_INDEX] = countryFact1;
+                facts[SECOND_FACT_INDEX] = countryFact2;
+                facts[THIRD_FACT_INDEX] = countryFact3;
+
+                countryToAdd = new Country(countryName, countryCapital, facts);
+
+                countries.put(countryName, countryToAdd);
             }
         }
     }
