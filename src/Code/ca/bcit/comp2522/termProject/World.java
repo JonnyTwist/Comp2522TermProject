@@ -1,8 +1,6 @@
 package ca.bcit.comp2522.termProject;
 
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Scanner;
+import java.util.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 
@@ -24,7 +22,8 @@ class World
     private static final int SECOND_FACT_INDEX = 1;
     private static final int THIRD_FACT_INDEX = 2;
 
-    private static Map<String, Country> countries;
+    static Map<String, Country> countries;
+    static List<Country>        countriesValues;
 
     static
     {
@@ -38,6 +37,8 @@ class World
         {
             System.out.println("ERROR!!! FILE NOT FOUND: " + ex);
         }
+
+        countriesValues = new ArrayList<>(countries.values());
     }
 
     private static void fillCountiesIntoMap(final Map<String, Country> countries)
