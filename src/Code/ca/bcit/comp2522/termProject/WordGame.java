@@ -9,10 +9,11 @@ class WordGame
     private static final int INITIAL_ROUND_NUMBER = 1;
     private static final int ROUNDS_PER_GAME      = 10;
     private static final int NUM_DIFF_ROUND_TYPES = 3;
-    private static final int NUM_DIFF_FACTS      = 3;
-    private static final int GIVEN_CAPITAL_ROUND = 0;
-    private static final int GIVEN_COUNTRY_ROUND = 1;
-    private static final int FACTS_ROUND         = 2;
+    private static final int NUM_DIFF_FACTS       = 3;
+    private static final int GIVEN_CAPITAL_ROUND  = 0;
+    private static final int GIVEN_COUNTRY_ROUND  = 1;
+    private static final int FACTS_ROUND          = 2;
+    private static final int MAX_GUESSES          = 2;
 
     private static int correctInOneCounter = 0;
     private static int correctInTwoCounter = 0;
@@ -76,21 +77,29 @@ class WordGame
 
             switch (roundType)
             {
-                case GIVEN_CAPITAL_ROUND ->
+                case GIVEN_CAPITAL_ROUND -> {
                     roundResult = roundOfCapital(country);
-                case GIVEN_COUNTRY_ROUND ->
+                }
+                case GIVEN_COUNTRY_ROUND -> {
                     roundResult = roundOfCountry(country);
-                case FACTS_ROUND ->
-                    roundResult = roundOfFacts(country);
+                }
+                case FACTS_ROUND -> {
+                    final int chosenFact = rand.nextInt(NUM_DIFF_FACTS);
+                    roundResult = roundOfFacts(country, chosenFact);
+                }
+                default -> {
+                    System.out.println("I SHOULDN'T BE HERE!");
+                    roundResult = -1;
+                }
             }
 
-            //todo the calculations after the rounds
 
+            //todo the calculations after the rounds
+            System.out.println(roundResult);
         }
     }
 
     /**
-     * todo implement
      * Does one round of:
      * The program will print a capital city, and ask the user what country it is the
      * capital of.
@@ -100,11 +109,23 @@ class WordGame
     private static int roundOfCapital(final Country country)
     {
         final String answer;
-        return 0;
+        final String countryCapital;
+        final int roundResult;
+
+        answer = country.getName();
+        countryCapital = country.getCapitalCityName();
+
+        System.out.println("NAME THE COUNTRY ROUND!");
+        //todo remove after test
+        System.out.println(answer);
+        System.out.println("What is the country that has a capital named " + countryCapital + "?");
+
+        roundResult = playRound(answer);
+
+        return roundResult;
     }
 
     /**
-     * todo implement
      * Does one round of:
      * The program will print the country name, and ask the user what is its capital
      * city.
@@ -114,20 +135,74 @@ class WordGame
     private static int roundOfCountry(final Country country)
     {
         final String answer;
-        return 0;
+        final String countryName;
+        final int roundResult;
+
+        answer = country.getCapitalCityName();
+        countryName = country.getName();
+
+        System.out.println("NAME THE CAPITAL ROUND!");
+        //todo remove after test
+        System.out.println(answer);
+        System.out.println("What is the capital of " + countryName);
+
+        roundResult = playRound(answer);
+
+        return roundResult;
     }
 
     /**
-     * todo implement
      * Does one round of:
      * The program will print one of the three facts, and ask the user which country
      * is being described.
      * @param country the country that this round will use.
      * @return the result of the round.
      */
-    private static int roundOfFacts(final Country country)
+    private static int roundOfFacts(final Country country,
+                                    final int chosenFact)
     {
+
         final String answer;
-        return 0;
+        final String fact;
+        final int roundResult;
+
+        answer = country.getName();
+        fact = country.getFacts()[chosenFact];
+
+        System.out.println("FACT ROUND!");
+        //todo remove after test
+        System.out.println(answer);
+        System.out.println(fact);
+        System.out.println("What is the name of the country?");
+
+        roundResult = playRound(answer);
+
+        return roundResult;
+    }
+
+    private static int playRound(final String answer)
+    {
+        int guessCount;
+        final Scanner scan;
+        String userInput;
+
+        scan = new Scanner(System.in);
+
+        for (guessCount = 0; guessCount < MAX_GUESSES; guessCount++)
+        {
+            userInput = scan.nextLine().trim();
+
+            if (userInput.equalsIgnoreCase(answer))
+            {
+                System.out.println("Correct");
+                break;
+            }
+            else
+            {
+                System.out.println("Incorrect");
+            }
+        }
+
+        return guessCount;
     }
 }
