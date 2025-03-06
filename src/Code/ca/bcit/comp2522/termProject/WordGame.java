@@ -3,23 +3,28 @@ package ca.bcit.comp2522.termProject;
 import java.util.Scanner;
 import java.util.Random;
 
-//NEED TO READ MORE ON HOW THIS WORKS SOMETHING WITH THE a-z FILES
+//todo javadoc
 class WordGame
 {
-    private static final int INITIAL_ROUND_NUMBER = 1;
-    private static final int ROUNDS_PER_GAME      = 10;
-    private static final int NUM_DIFF_ROUND_TYPES = 3;
-    private static final int NUM_DIFF_FACTS       = 3;
-    private static final int GIVEN_CAPITAL_ROUND  = 0;
-    private static final int GIVEN_COUNTRY_ROUND  = 1;
-    private static final int FACTS_ROUND          = 2;
-    private static final int MAX_GUESSES          = 2;
+    private static final int    CORRECT_IN_ONE_GUESS = 0;
+    private static final int    CORRECT_IN_TWO_GUESS = 1;
+    private static final int    INITIAL_ROUND_NUMBER = 1;
+    private static final int    ROUNDS_PER_GAME      = 10;
+    private static final int    NUM_DIFF_ROUND_TYPES = 3;
+    private static final int    NUM_DIFF_FACTS       = 3;
+    private static final int    GIVEN_CAPITAL_ROUND  = 0;
+    private static final int    GIVEN_COUNTRY_ROUND  = 1;
+    private static final int    FACTS_ROUND          = 2;
+    private static final int    MAX_GUESSES          = 2;
+    private static final String PLAY_AGAIN           = "yes";
+    private static final String QUIT                 = "no";
 
+    private static int wordGamesPlayed     = 0;
     private static int correctInOneCounter = 0;
     private static int correctInTwoCounter = 0;
-    private static int incorrectCounter = 0;
-    private static final String PLAY_AGAIN = "yes";
-    private static final String QUIT = "no";
+    private static int incorrectCounter    = 0;
+
+
 
     static void playWordGame()
     {
@@ -32,6 +37,10 @@ class WordGame
         do
         {
             doTenRounds();
+
+            wordGamesPlayed++;
+
+            reportTotalScore();
 
             //END OF GAME
             System.out.print("Would you like to play again? (yes/no)\nAnswer: ");
@@ -47,11 +56,11 @@ class WordGame
 
         } while (!keepPlaying.equalsIgnoreCase(QUIT));
 
-        //todo record the score
+        //todo record the score then reset statics
     }
 
     /**
-     * todo javadoc better
+     * todo comment better and remove javadoc
      * Loops 10 rounds of the word game and records results.
      */
     private static void doTenRounds()
@@ -88,18 +97,38 @@ class WordGame
                     roundResult = roundOfFacts(country, chosenFact);
                 }
                 default -> {
-                    System.out.println("I SHOULDN'T BE HERE!");
-                    roundResult = -1;
+                    throw new IllegalArgumentException("CODE HAS REACHED A SPOT IT SHOULDN'T");
                 }
             }
 
-
-            //todo the calculations after the rounds
-            System.out.println(roundResult);
+            if (roundResult == CORRECT_IN_ONE_GUESS)
+            {
+                correctInOneCounter++;
+            }
+            else if (roundResult == CORRECT_IN_TWO_GUESS) {
+                correctInTwoCounter++;
+            }
+            else
+            {
+                incorrectCounter++;
+            }
         }
     }
 
-    /**
+    /*
+     * prints the total score of word game.
+     */
+    private static void reportTotalScore()
+    {
+        System.out.println();
+        System.out.println("\t-\t" + wordGamesPlayed + " word games played");
+        System.out.println("\t-\t" + correctInOneCounter + " correct answers on the first attempt");
+        System.out.println("\t-\t" + correctInTwoCounter + " correct answers on the second attempt");
+        System.out.println("\t-\t" + incorrectCounter + " incorrect answers on two attempts each");
+        System.out.println();
+    }
+
+    /*
      * Does one round of:
      * The program will print a capital city, and ask the user what country it is the
      * capital of.
@@ -125,7 +154,7 @@ class WordGame
         return roundResult;
     }
 
-    /**
+    /*
      * Does one round of:
      * The program will print the country name, and ask the user what is its capital
      * city.
@@ -144,14 +173,14 @@ class WordGame
         System.out.println("NAME THE CAPITAL ROUND!");
         //todo remove after test
         System.out.println(answer);
-        System.out.println("What is the capital of " + countryName);
+        System.out.println("What is the capital of " + countryName + "?");
 
         roundResult = playRound(answer);
 
         return roundResult;
     }
 
-    /**
+    /*
      * Does one round of:
      * The program will print one of the three facts, and ask the user which country
      * is being described.
@@ -180,6 +209,12 @@ class WordGame
         return roundResult;
     }
 
+    /*
+     * PLays a single round of any round type. An answer is inputted then
+     * follows the rules of two chances to guess before giving correct answer.
+     * @param answer the correct answer for the question.
+     * @return the result of the round.
+     */
     private static int playRound(final String answer)
     {
         int guessCount;
