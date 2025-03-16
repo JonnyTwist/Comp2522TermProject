@@ -4,6 +4,7 @@ import java.util.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 
+//todo javadoc
 /**
  * Used in the word game?
  */
@@ -73,6 +74,8 @@ class World
                 final String countryFact3;
                 final Country countryToAdd;
 
+                //todo skip malformed data in here somewhere
+
                 countryAndCapital = countryAndCapitalOrBlank.split(":");
                 countryName = countryAndCapital[COUNTRY_INDEX];
                 countryCapital = countryAndCapital[CAPITAL_INDEX];
@@ -91,5 +94,7 @@ class World
             }
         }
     }
+    //todo close all scanners
+    // use System.lineSeperator() instead of \n
 
 }

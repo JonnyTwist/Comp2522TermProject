@@ -30,6 +30,7 @@ class WordGame
     {
         String keepPlaying;
         final Scanner scan;
+        final Score score;
 
         scan = new Scanner(System.in);
 
@@ -57,6 +58,17 @@ class WordGame
         } while (!keepPlaying.equalsIgnoreCase(QUIT));
 
         //todo record the score then reset statics
+        score = new Score(wordGamesPlayed,
+                          correctInOneCounter,
+                          correctInTwoCounter,
+                          incorrectCounter);
+
+        score.recordScore();
+
+        wordGamesPlayed     = 0;
+        correctInOneCounter = 0;
+        correctInTwoCounter = 0;
+        incorrectCounter    = 0;
     }
 
     /**

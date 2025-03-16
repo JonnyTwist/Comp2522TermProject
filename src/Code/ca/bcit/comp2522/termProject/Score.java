@@ -1,5 +1,10 @@
 package ca.bcit.comp2522.termProject;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -11,7 +16,15 @@ import java.time.format.DateTimeFormatter;
  */
 class Score {
 
-    private static final int SMALLEST_NON_NEGATIVE = 0;
+    private static final int  SMALLEST_NON_NEGATIVE = 0;
+    private static final Path DATA_DIRECTORY_PATH;
+    private static final Path DATA_PATH;
+
+    static
+    {
+        DATA_DIRECTORY_PATH = Paths.get("score");
+        DATA_PATH = Paths.get("score", "score.txt");
+    }
 
     private final String dateTimePlayed;
     private final int numGamesPlayed;
@@ -87,6 +100,57 @@ class Score {
         return formattedDateTime;
     }
 
-    //todo make a method that adds to / creates a score.txt then call that in WordGame
+    /**
+     * Records the score into score.txt.
+     */
+    void recordScore()
+    {
+        try {
+            Files.createDirectories(DATA_DIRECTORY_PATH);
+        } catch (final IOException e) {
+            System.out.println("Error creating directory: " + e.getMessage());
+        }
 
+        final int finalScore;
+        finalScore = (numCorrectFirstAttempt * 2) + numCorrectSecondAttempt;
+
+        final StringBuilder dataOutput;
+        dataOutput = new StringBuilder();
+
+        dataOutput.append("Date and Time: " )
+                .append(dateTimePlayed)
+                .append(System.lineSeparator())
+                .append("Games Played: ")
+                .append(numGamesPlayed)
+                .append(System.lineSeparator())
+                .append("Correct First Attempts: ")
+                .append(numCorrectFirstAttempt)
+                .append(System.lineSeparator())
+                .append("Correct Second Attempts: ")
+                .append(numCorrectSecondAttempt)
+                .append(System.lineSeparator())
+                .append("Incorrect Attempts: ")
+                .append(numIncorrectSecondAttempt)
+                .append(System.lineSeparator())
+                .append("Total Score: ")
+                .append(finalScore)
+                .append(System.lineSeparator())
+                .append(System.lineSeparator());
+
+        try
+        {
+            Files.writeString(
+                    DATA_PATH,
+                    dataOutput,
+                    StandardOpenOption.CREATE,
+                    StandardOpenOption.APPEND
+            );
+        }
+        catch(final IOException e)
+        {
+            System.out.println("error writing score file: " + e.getMessage());
+        }
+
+        //todo check if new highscore
+    }
 }
