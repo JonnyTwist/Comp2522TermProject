@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.OptionalInt;
 
 /**
  * todo comment all methods and comment better
@@ -16,6 +17,9 @@ import java.time.format.DateTimeFormatter;
  */
 class Score {
 
+    //todo remove all magic num and replace with constants
+
+    private static final int DOUBLE = 2;
     private static final int  SMALLEST_NON_NEGATIVE = 0;
     private static final Path DATA_DIRECTORY_PATH;
     private static final Path DATA_PATH;
@@ -105,14 +109,19 @@ class Score {
      */
     void recordScore()
     {
+        final int finalScore;
+        final double scoreAvg;
+
+        finalScore = (numCorrectFirstAttempt * DOUBLE) + numCorrectSecondAttempt;
+        scoreAvg = (double) finalScore / numGamesPlayed;
+
         try {
             Files.createDirectories(DATA_DIRECTORY_PATH);
         } catch (final IOException e) {
             System.out.println("Error creating directory: " + e.getMessage());
         }
 
-        final int finalScore;
-        finalScore = (numCorrectFirstAttempt * 2) + numCorrectSecondAttempt;
+        checkHighscore(scoreAvg);
 
         final StringBuilder dataOutput;
         dataOutput = new StringBuilder();
@@ -151,6 +160,46 @@ class Score {
             System.out.println("error writing score file: " + e.getMessage());
         }
 
-        //todo check if new highscore
+        //todo check if new highscore using streams and filtering by contains and get max
+        // double check if it is total score or average score
+    }
+
+    private static void checkHighscore(final double scoreAvg)
+    {
+        if (!Files.exists(DATA_PATH))
+        {
+            //todo make this path better
+            System.out.println("new highscore");
+            return;
+        }
+        System.out.println("I am here");
+
+        final OptionalInt prevHighScore;
+
+        try
+        {
+            //todo this needs changed to divide by games played
+            // perhaps stream to a list then group from there... need date as well
+            prevHighScore = Files.readAllLines(DATA_PATH)
+                    .stream()
+                    .filter(line -> line.contains("Total Score:"))
+                    .filter(line -> line.indexOf(":") == line.lastIndexOf(":"))
+                    .map(line -> line.split(":", 2)[1].trim())
+                    .mapToInt(Integer::parseInt)
+                    .max();
+
+            prevHighScore.ifPresent(prevHigh->compareScores(scoreAvg, prevHigh));
+        }
+        catch (final IOException ex)
+        {
+            System.out.println("problem reading file: " + ex);
+        }
+    }
+
+    //todo ensure the prevHigh comes in as a double
+    private static void compareScores(final double scoreAvg,
+                                      final double prevHighScoreAvg)
+    {
+        //todo this
     }
 }
