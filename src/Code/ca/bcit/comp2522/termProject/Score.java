@@ -7,7 +7,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.OptionalInt;
+import java.util.List;
 
 /**
  * todo comment all methods and comment better
@@ -19,10 +19,24 @@ class Score {
 
     //todo remove all magic num and replace with constants
 
-    private static final int DOUBLE = 2;
-    private static final int  SMALLEST_NON_NEGATIVE = 0;
-    private static final Path DATA_DIRECTORY_PATH;
-    private static final Path DATA_PATH;
+    private static final Path   DATA_DIRECTORY_PATH;
+    private static final Path   DATA_PATH;
+    private static final String DEFAULT_PREV_DATE     = "";
+    private static final String DATE_TIME_PHRASE      = "Date and Time: ";
+    private static final String GAME_PLAYED_PHRASE    = "Games Played: ";
+    private static final String TOTAL_SCORE_PHRASE    = "Total Score: ";
+    private static final int    INCREMENT_AMOUNT      = 3;
+    private static final int    DOUBLE                = 2;
+    private static final int    SMALLEST_NON_NEGATIVE = 0;
+    private static final int    MIN_SCORE             = 0;
+    private static final int    MIN_GAMES_PLAYED      = 0;
+    private static final int    DEFAULT_PREV_HIGH     = 0;
+    private static final int    FIRST_ITEM            = 0;
+    private static final int    SECOND_ITEM           = 1;
+    private static final int    OFFSET_BY_ONE         = 1;
+    private static final int    OFFSET_BY_TWO         = 2;
+    private static final int    SPLIT_LIMIT           = 2;
+
 
     static
     {
@@ -126,10 +140,10 @@ class Score {
         final StringBuilder dataOutput;
         dataOutput = new StringBuilder();
 
-        dataOutput.append("Date and Time: " )
+        dataOutput.append(DATE_TIME_PHRASE)
                 .append(dateTimePlayed)
                 .append(System.lineSeparator())
-                .append("Games Played: ")
+                .append(GAME_PLAYED_PHRASE)
                 .append(numGamesPlayed)
                 .append(System.lineSeparator())
                 .append("Correct First Attempts: ")
@@ -141,7 +155,7 @@ class Score {
                 .append("Incorrect Attempts: ")
                 .append(numIncorrectSecondAttempt)
                 .append(System.lineSeparator())
-                .append("Total Score: ")
+                .append(TOTAL_SCORE_PHRASE)
                 .append(finalScore)
                 .append(System.lineSeparator())
                 .append(System.lineSeparator());
@@ -159,36 +173,76 @@ class Score {
         {
             System.out.println("error writing score file: " + e.getMessage());
         }
-
-        //todo check if new highscore using streams and filtering by contains and get max
-        // double check if it is total score or average score
     }
 
+    //todo look at modularizing this
     private static void checkHighscore(final double scoreAvg)
     {
+        //if path doesn't exist then it's a new highscore
         if (!Files.exists(DATA_PATH))
         {
-            //todo make this path better
-            System.out.println("new highscore");
+            compareScores(scoreAvg,
+                          DEFAULT_PREV_HIGH,
+                          DEFAULT_PREV_DATE);
             return;
         }
         System.out.println("I am here");
 
-        final OptionalInt prevHighScore;
+        final List<String> filteredData;
+        String bestDateTime = "";
+        double prevHighScore = MIN_SCORE;
 
         try
         {
-            //todo this needs changed to divide by games played
-            // perhaps stream to a list then group from there... need date as well
-            prevHighScore = Files.readAllLines(DATA_PATH)
+            filteredData = Files.readAllLines(DATA_PATH)
                     .stream()
-                    .filter(line -> line.contains("Total Score:"))
-                    .filter(line -> line.indexOf(":") == line.lastIndexOf(":"))
-                    .map(line -> line.split(":", 2)[1].trim())
-                    .mapToInt(Integer::parseInt)
-                    .max();
+                    .filter(line -> line.startsWith(TOTAL_SCORE_PHRASE) ||
+                            line.startsWith(DATE_TIME_PHRASE) ||
+                            line.startsWith(GAME_PLAYED_PHRASE))
+                    .filter(line -> line.indexOf(": ") == line.lastIndexOf(": "))
+                    .toList();
 
-            prevHighScore.ifPresent(prevHigh->compareScores(scoreAvg, prevHigh));
+            System.out.println(filteredData);
+
+            for (int i = 0; i < filteredData.size(); i += INCREMENT_AMOUNT)
+            {
+                final String dateTime;
+                final int gamesPlayed;
+                final int totalScore;
+
+
+                //todo remove magic num here
+                dateTime = filteredData.get(i)
+                                .split(": ", SPLIT_LIMIT)[SECOND_ITEM]
+                                .trim();
+
+                gamesPlayed = Integer.parseInt(
+                                filteredData.get(i + OFFSET_BY_ONE)
+                                .split(": ", SPLIT_LIMIT)[SECOND_ITEM]
+                                .trim()
+                                );
+
+                totalScore = Integer.parseInt(
+                                filteredData.get(i + OFFSET_BY_TWO)
+                                .split(": ", SPLIT_LIMIT)[SECOND_ITEM]
+                                .trim()
+                                );
+
+                //logically there should never be 0 games played but just incase I will check
+                if (gamesPlayed > MIN_GAMES_PLAYED) {
+                    double averageScore = (double) totalScore / gamesPlayed;
+
+                    if (averageScore > prevHighScore) {
+                        prevHighScore = averageScore;
+                        bestDateTime = dateTime;
+                    }
+                }
+            }
+
+            compareScores(scoreAvg,
+                          prevHighScore,
+                          bestDateTime);
+
         }
         catch (final IOException ex)
         {
@@ -196,10 +250,38 @@ class Score {
         }
     }
 
+
     //todo ensure the prevHigh comes in as a double
     private static void compareScores(final double scoreAvg,
-                                      final double prevHighScoreAvg)
+                                      final double prevHighScoreAvg,
+                                      final String bestDateTime)
     {
-        //todo this
+        final String date;
+        final String time;
+
+        if (bestDateTime.isBlank())
+        {
+            System.out.println("CONGRATULATIONS! You are the new high score with an average of " +
+                                       scoreAvg + " points per game; there was no previous highscore");
+        }
+        else if (scoreAvg > prevHighScoreAvg)
+        {
+            date = bestDateTime.split(" ")[FIRST_ITEM];
+            time = bestDateTime.split(" ")[SECOND_ITEM];
+
+            System.out.println("CONGRATULATIONS! You are the new high score with an average of " +
+                                       scoreAvg + " points per game; the previous record was " +
+                                       prevHighScoreAvg + " points per game and was set " + date +
+                                       " at " + time + ".");
+        }
+        else
+        {
+            date = bestDateTime.split(" ")[FIRST_ITEM];
+            time = bestDateTime.split(" ")[SECOND_ITEM];
+
+            System.out.println("You did not beat the high score of " +
+                                       prevHighScoreAvg + " points per game from "
+                                       + date + " at " + time + ".");
+        }
     }
 }
