@@ -15,7 +15,7 @@ import java.util.Scanner;
  * @author Jonny Twist
  * @version 1.0
  */
-class Main
+final class Main
 {
 
     private static final String QUIT = "q";

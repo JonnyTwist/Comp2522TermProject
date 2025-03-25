@@ -8,7 +8,7 @@ import java.io.FileNotFoundException;
 /**
  * Used in the word game?
  */
-class World
+final class World
 {
     private static final char[] files = { 'a', 'b', 'c', 'd', 'e', 'f',
                                     'g', 'h', 'i', 'j', 'k', 'l',

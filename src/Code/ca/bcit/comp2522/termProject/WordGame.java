@@ -1,10 +1,12 @@
 package ca.bcit.comp2522.termProject;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Scanner;
 import java.util.Random;
 
 //todo javadoc
-class WordGame
+final class WordGame
 {
     private static final int    CORRECT_IN_ONE_GUESS = 0;
     private static final int    CORRECT_IN_TWO_GUESS = 1;
@@ -18,12 +20,12 @@ class WordGame
     private static final int    MAX_GUESSES          = 2;
     private static final String PLAY_AGAIN           = "yes";
     private static final String QUIT                 = "no";
+    private static final String SCORE_PATH           = "score.txt";
 
     private static int wordGamesPlayed     = 0;
     private static int correctInOneCounter = 0;
     private static int correctInTwoCounter = 0;
     private static int incorrectCounter    = 0;
-
 
 
     static void playWordGame()
@@ -63,7 +65,7 @@ class WordGame
                           correctInTwoCounter,
                           incorrectCounter);
 
-        score.recordScore();
+        Score.appendScoreToFile(score, SCORE_PATH);
 
         wordGamesPlayed     = 0;
         correctInOneCounter = 0;

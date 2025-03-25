@@ -4,7 +4,7 @@ package ca.bcit.comp2522.termProject;
 // MUST BE UNIQUE
 
 //todo make game 2 player (tablut) viking chess
-public class MyGame
+public final class MyGame
 {
     private static final int BOARD_SIZE = 9;
     private static final int[][] board;

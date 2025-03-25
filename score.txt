@@ -1,0 +1,7 @@
+Date and Time: 2025-03-24 22:10:44
+Games Played: 1
+Correct First Attempts: 2
+Correct Second Attempts: 1
+Incorrect Attempts: 7
+Total Score: 5
+

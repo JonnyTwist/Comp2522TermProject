@@ -1,5 +1,6 @@
 package ca.bcit.comp2522.termProject;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -7,7 +8,9 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * todo comment all methods and comment better
@@ -15,34 +18,33 @@ import java.util.List;
  * for if this is a new record and stuff like that.
  * Record the current time as well.
  */
-class Score {
+public final class Score {
 
     //todo remove all magic num and replace with constants
 
-    private static final Path   DATA_DIRECTORY_PATH;
-    private static final Path   DATA_PATH;
-    private static final String DEFAULT_PREV_DATE     = "";
-    private static final String DATE_TIME_PHRASE      = "Date and Time: ";
-    private static final String GAME_PLAYED_PHRASE    = "Games Played: ";
-    private static final String TOTAL_SCORE_PHRASE    = "Total Score: ";
-    private static final int    INCREMENT_AMOUNT      = 3;
-    private static final int    DOUBLE                = 2;
-    private static final int    SMALLEST_NON_NEGATIVE = 0;
-    private static final int    MIN_SCORE             = 0;
-    private static final int    MIN_GAMES_PLAYED      = 0;
-    private static final int    DEFAULT_PREV_HIGH     = 0;
-    private static final int    FIRST_ITEM            = 0;
-    private static final int    SECOND_ITEM           = 1;
-    private static final int    OFFSET_BY_ONE         = 1;
-    private static final int    OFFSET_BY_TWO         = 2;
-    private static final int    SPLIT_LIMIT           = 2;
-
-
-    static
-    {
-        DATA_DIRECTORY_PATH = Paths.get("score");
-        DATA_PATH = Paths.get("score", "score.txt");
-    }
+    private static final String DEFAULT_PREV_DATE        = "";
+    private static final String DATE_TIME_PHRASE         = "Date and Time: ";
+    private static final String GAME_PLAYED_PHRASE       = "Games Played: ";
+    private static final String TOTAL_SCORE_PHRASE       = "Total Score: ";
+    private static final String CORRECT_IN_ONE_PHRASE    = "Correct First Attempts: ";
+    private static final String CORRECT_IN_TWO_PHRASE    = "Correct Second Attempts: ";
+    private static final String INCORRECT_PHRASE         = "Incorrect Attempts: ";
+    private static final int    INCREMENT_AMOUNT         = 3;
+    private static final int    DOUBLE                   = 2;
+    private static final int    SMALLEST_NON_NEGATIVE    = 0;
+    private static final int    MIN_SCORE                = 0;
+    private static final int    MIN_GAMES_PLAYED         = 0;
+    private static final int    DEFAULT_PREV_HIGH        = 0;
+    private static final int    FIRST_ITEM               = 0;
+    private static final int    SECOND_ITEM              = 1;
+    private static final int    OFFSET_BY_ONE            = 1;
+    private static final int    OFFSET_BY_TWO            = 2;
+    private static final int    SPLIT_LIMIT              = 2;
+    private static final int    EXPECTED_SCORE_DATA_SIZE = 5;
+    private static final int    SECOND_DATA_ITEM         = 1;
+    private static final int    THIRD_DATA_ITEM          = 2;
+    private static final int    FOURTH_DATA_ITEM         = 3;
+    private static final int    FIFTH_DATA_ITEM          = 4;
 
     private final String dateTimePlayed;
     private final int numGamesPlayed;
@@ -51,17 +53,35 @@ class Score {
     private final int numIncorrectSecondAttempt;
 
 
-    Score(final int numGamesPlayed,
-          final int numCorrectFirstAttempt,
-          final int numCorrectSecondAttempt,
-          final int numIncorrectSecondAttempt)
+    public Score(final int numGamesPlayed,
+                 final int numCorrectFirstAttempt,
+                 final int numCorrectSecondAttempt,
+                 final int numIncorrectSecondAttempt)
     {
         validateNotNegative(numGamesPlayed);
         validateNotNegative(numCorrectFirstAttempt);
         validateNotNegative(numCorrectSecondAttempt);
         validateNotNegative(numIncorrectSecondAttempt);
 
-        dateTimePlayed = formatTime();
+        dateTimePlayed = formatTime(null);
+        this.numGamesPlayed = numGamesPlayed;
+        this.numCorrectFirstAttempt = numCorrectFirstAttempt;
+        this.numCorrectSecondAttempt = numCorrectSecondAttempt;
+        this.numIncorrectSecondAttempt = numIncorrectSecondAttempt;
+    }
+
+    public Score(final LocalDateTime time,
+                 final int numGamesPlayed,
+                 final int numCorrectFirstAttempt,
+                 final int numCorrectSecondAttempt,
+                 final int numIncorrectSecondAttempt)
+    {
+        validateNotNegative(numGamesPlayed);
+        validateNotNegative(numCorrectFirstAttempt);
+        validateNotNegative(numCorrectSecondAttempt);
+        validateNotNegative(numIncorrectSecondAttempt);
+
+        dateTimePlayed = formatTime(time);
         this.numGamesPlayed = numGamesPlayed;
         this.numCorrectFirstAttempt = numCorrectFirstAttempt;
         this.numCorrectSecondAttempt = numCorrectSecondAttempt;
@@ -105,13 +125,21 @@ class Score {
      * Gets the current dateTime and returns it formatted as a String.
      * @return the current time as a String.
      */
-    private String formatTime()
+    private String formatTime(final LocalDateTime time)
     {
         final LocalDateTime currentTime;
         final DateTimeFormatter formatter;
         final String formattedDateTime;
 
-        currentTime = LocalDateTime.now();
+        if (time == null)
+        {
+            currentTime = LocalDateTime.now();
+        }
+        else
+        {
+            currentTime = time;
+        }
+
         formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         formattedDateTime = currentTime.format(formatter);
 
@@ -121,39 +149,37 @@ class Score {
     /**
      * Records the score into score.txt.
      */
-    void recordScore()
+    public static void appendScoreToFile(final Score score,
+                                         final String fileName)
     {
         final int finalScore;
         final double scoreAvg;
+        final Path filePath;
 
-        finalScore = (numCorrectFirstAttempt * DOUBLE) + numCorrectSecondAttempt;
-        scoreAvg = (double) finalScore / numGamesPlayed;
+        finalScore = score.getScore();
+        scoreAvg = (double) finalScore / score.numGamesPlayed;
+        filePath = Paths.get(fileName);
 
-        try {
-            Files.createDirectories(DATA_DIRECTORY_PATH);
-        } catch (final IOException e) {
-            System.out.println("Error creating directory: " + e.getMessage());
-        }
-
-        checkHighscore(scoreAvg);
+        checkHighscore(scoreAvg,
+                       filePath);
 
         final StringBuilder dataOutput;
         dataOutput = new StringBuilder();
 
         dataOutput.append(DATE_TIME_PHRASE)
-                .append(dateTimePlayed)
+                .append(score.dateTimePlayed)
                 .append(System.lineSeparator())
                 .append(GAME_PLAYED_PHRASE)
-                .append(numGamesPlayed)
+                .append(score.numGamesPlayed)
                 .append(System.lineSeparator())
-                .append("Correct First Attempts: ")
-                .append(numCorrectFirstAttempt)
+                .append(CORRECT_IN_ONE_PHRASE)
+                .append(score.numCorrectFirstAttempt)
                 .append(System.lineSeparator())
-                .append("Correct Second Attempts: ")
-                .append(numCorrectSecondAttempt)
+                .append(CORRECT_IN_TWO_PHRASE)
+                .append(score.numCorrectSecondAttempt)
                 .append(System.lineSeparator())
-                .append("Incorrect Attempts: ")
-                .append(numIncorrectSecondAttempt)
+                .append(INCORRECT_PHRASE)
+                .append(score.numIncorrectSecondAttempt)
                 .append(System.lineSeparator())
                 .append(TOTAL_SCORE_PHRASE)
                 .append(finalScore)
@@ -163,7 +189,7 @@ class Score {
         try
         {
             Files.writeString(
-                    DATA_PATH,
+                    filePath,
                     dataOutput,
                     StandardOpenOption.CREATE,
                     StandardOpenOption.APPEND
@@ -175,18 +201,25 @@ class Score {
         }
     }
 
+    public final int getScore()
+    {
+        return (numCorrectFirstAttempt * DOUBLE) + numCorrectSecondAttempt;
+    }
+
     //todo look at modularizing this
-    private static void checkHighscore(final double scoreAvg)
+    private static void checkHighscore(final double scoreAvg,
+                                       final Path dataPath)
     {
         //if path doesn't exist then it's a new highscore
-        if (!Files.exists(DATA_PATH))
+        if (!Files.exists(dataPath))
         {
             compareScores(scoreAvg,
                           DEFAULT_PREV_HIGH,
                           DEFAULT_PREV_DATE);
             return;
         }
-        System.out.println("I am here");
+
+        //todo change this to use the readDataMethod
 
         final List<String> filteredData;
         String bestDateTime = "";
@@ -194,15 +227,13 @@ class Score {
 
         try
         {
-            filteredData = Files.readAllLines(DATA_PATH)
+            filteredData = Files.readAllLines(dataPath)
                     .stream()
                     .filter(line -> line.startsWith(TOTAL_SCORE_PHRASE) ||
                             line.startsWith(DATE_TIME_PHRASE) ||
                             line.startsWith(GAME_PLAYED_PHRASE))
                     .filter(line -> line.indexOf(": ") == line.lastIndexOf(": "))
                     .toList();
-
-            System.out.println(filteredData);
 
             for (int i = 0; i < filteredData.size(); i += INCREMENT_AMOUNT)
             {
@@ -283,5 +314,148 @@ class Score {
                                        prevHighScoreAvg + " points per game from "
                                        + date + " at " + time + ".");
         }
+    }
+
+    public static List<Score> readScoresFromFile(final String path)
+    {
+        final Path  dataPath;
+        final List<Score> scores;
+
+        dataPath  = Paths.get(path);
+        scores = new ArrayList<>();
+
+        //if the file doesn't exist then there is nothing to read. return empty list
+        if (!Files.exists(dataPath))
+        {
+            return scores;
+        }
+
+        final List<String> scoreData;
+
+        scoreData = new ArrayList<>();
+
+        try
+        {
+            Files.lines(dataPath).forEach(line -> {
+                if(!line.isBlank())
+                {
+                    scoreData.add(line);
+
+                    if(scoreData.size() == 6 || line.contains(TOTAL_SCORE_PHRASE))
+                    {
+                        final Score newScore = createScoreObject(scoreData);
+
+                        if(newScore != null)
+                        {
+                            scores.add(newScore);
+                        }
+                        scoreData.clear();
+                    }
+                }
+            });
+        }
+        catch (final IOException ex)
+        {
+            System.out.println("Failed to read file: " + ex);
+        }
+
+
+        return scores;
+    }
+
+    private static Score createScoreObject(final List<String> scoreData)
+    {
+        final String dateTimeLine;
+        final String gamePlayedLine;
+        final String corInOneLine;
+        final String corInTwoLine;
+        final String incorrectLine;
+
+        final LocalDateTime dateTime;
+        final int gamesPlayed;
+        final int correctInOne;
+        final int correctInTwo;
+        final int incorrect;
+
+        final DateTimeFormatter formatter;
+        formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+        if (scoreData.size() < EXPECTED_SCORE_DATA_SIZE)
+        {
+            System.out.println("Corrupted data skipped");
+            return null;
+        }
+
+        dateTimeLine = scoreData.getFirst();
+        gamePlayedLine = scoreData.get(SECOND_DATA_ITEM);
+        corInOneLine = scoreData.get(THIRD_DATA_ITEM);
+        corInTwoLine = scoreData.get(FOURTH_DATA_ITEM);
+        incorrectLine = scoreData.get(FIFTH_DATA_ITEM);
+
+
+        if (dateTimeLine.startsWith(DATE_TIME_PHRASE) &&
+            gamePlayedLine.startsWith(GAME_PLAYED_PHRASE) &&
+            corInOneLine.startsWith(CORRECT_IN_ONE_PHRASE) &&
+            corInTwoLine.startsWith(CORRECT_IN_TWO_PHRASE) &&
+            incorrectLine.startsWith(INCORRECT_PHRASE))
+        {
+            try
+            {
+                dateTime = LocalDateTime.parse(dateTimeLine.substring(DATE_TIME_PHRASE.length()), formatter);
+                gamesPlayed = Integer.parseInt(gamePlayedLine.substring(GAME_PLAYED_PHRASE.length()));
+                correctInOne = Integer.parseInt(corInOneLine.substring(CORRECT_IN_ONE_PHRASE.length()));
+                correctInTwo  = Integer.parseInt(corInTwoLine.substring(CORRECT_IN_TWO_PHRASE.length()));
+                incorrect  = Integer.parseInt(incorrectLine.substring(INCORRECT_PHRASE.length()));
+
+                return new Score(dateTime,
+                                 gamesPlayed,
+                                 correctInOne,
+                                 correctInTwo,
+                                 incorrect);
+            }
+            catch (final Exception ex)
+            {
+                System.out.println("Failed to parse lines. Corrupted data skipped: " + ex);
+                return null;
+            }
+        }
+        else
+        {
+            System.out.println("Corrupted data skipped");
+            return null;
+        }
+    }
+
+    @Override
+    public String toString()
+    {
+        final StringBuilder sb;
+        final int finalScore;
+
+        sb = new StringBuilder();
+        finalScore = getScore();
+
+
+        sb.append(DATE_TIME_PHRASE)
+                .append(dateTimePlayed)
+                .append("\n")
+                .append(GAME_PLAYED_PHRASE)
+                .append(numGamesPlayed)
+                .append("\n")
+                .append(CORRECT_IN_ONE_PHRASE)
+                .append(numCorrectFirstAttempt)
+                .append("\n")
+                .append(CORRECT_IN_TWO_PHRASE)
+                .append(numCorrectSecondAttempt)
+                .append("\n")
+                .append(INCORRECT_PHRASE)
+                .append(numIncorrectSecondAttempt)
+                .append("\n")
+                .append("Score: ")
+                .append(finalScore)
+                .append(" points")
+                .append(System.lineSeparator());
+
+        return sb.toString();
     }
 }
