@@ -1,7 +1,5 @@
 package ca.bcit.comp2522.termProject;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Scanner;
 import java.util.Random;
 
@@ -18,6 +16,7 @@ final class WordGame
     private static final int    GIVEN_COUNTRY_ROUND  = 1;
     private static final int    FACTS_ROUND          = 2;
     private static final int    MAX_GUESSES          = 2;
+    private static final int    RESET                = 0;
     private static final String PLAY_AGAIN           = "yes";
     private static final String QUIT                 = "no";
     private static final String SCORE_PATH           = "score.txt";
@@ -28,14 +27,16 @@ final class WordGame
     private static int incorrectCounter    = 0;
 
 
+    /**
+     * The starting point of the word game.
+     * Runs 10 rounds then asks the user if they want to play again.
+     * If they don't want to play again then the score is saved and
+     * the static variables are reset.
+     */
     static void playWordGame()
     {
         String keepPlaying;
-        final Scanner scan;
         final Score score;
-
-        scan = new Scanner(System.in);
-
 
         do
         {
@@ -45,21 +46,10 @@ final class WordGame
 
             reportTotalScore();
 
-            //END OF GAME
-            System.out.print("Would you like to play again? (yes/no)\nAnswer: ");
-            keepPlaying = scan.next();
-
-            while(!keepPlaying.equalsIgnoreCase(QUIT) &&
-                  !keepPlaying.equalsIgnoreCase(PLAY_AGAIN))
-            {
-                System.out.println("Invalid answer!");
-                System.out.print("Would you like to play again? (yes/no)\nAnswer: ");
-                keepPlaying = scan.next();
-            }
+            keepPlaying = askUserIfTheyWantToPlayMore();
 
         } while (!keepPlaying.equalsIgnoreCase(QUIT));
 
-        //todo record the score then reset statics
         score = new Score(wordGamesPlayed,
                           correctInOneCounter,
                           correctInTwoCounter,
@@ -67,13 +57,40 @@ final class WordGame
 
         Score.appendScoreToFile(score, SCORE_PATH);
 
-        wordGamesPlayed     = 0;
-        correctInOneCounter = 0;
-        correctInTwoCounter = 0;
-        incorrectCounter    = 0;
+        wordGamesPlayed     = RESET;
+        correctInOneCounter = RESET;
+        correctInTwoCounter = RESET;
+        incorrectCounter    = RESET;
     }
 
-    /**
+    /*
+     * Asks the user if they want to play more.
+     * Ensures that the users answer is valid.
+     * @return the result of their choice.
+     */
+    private static String askUserIfTheyWantToPlayMore()
+    {
+
+        String userInput;
+        final Scanner scan;
+
+        scan = new Scanner(System.in);
+
+        System.out.print("Would you like to play again? (yes/no)\nAnswer: ");
+        userInput = scan.next();
+
+        while(!userInput.equalsIgnoreCase(QUIT) &&
+                !userInput.equalsIgnoreCase(PLAY_AGAIN))
+        {
+            System.out.println("Invalid answer!");
+            System.out.print("Would you like to play again? (yes/no)\nAnswer: ");
+            userInput = scan.next();
+        }
+
+        return userInput;
+    }
+
+    /*
      * todo comment better and remove javadoc
      * Loops 10 rounds of the word game and records results.
      */
@@ -252,6 +269,7 @@ final class WordGame
             }
         }
 
+        //scan.close();
         return guessCount;
     }
 }

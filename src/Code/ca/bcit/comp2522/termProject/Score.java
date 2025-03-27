@@ -1,6 +1,5 @@
 package ca.bcit.comp2522.termProject;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -29,7 +28,6 @@ public final class Score {
     private static final String CORRECT_IN_ONE_PHRASE    = "Correct First Attempts: ";
     private static final String CORRECT_IN_TWO_PHRASE    = "Correct Second Attempts: ";
     private static final String INCORRECT_PHRASE         = "Incorrect Attempts: ";
-    private static final int    INCREMENT_AMOUNT         = 3;
     private static final int    DOUBLE                   = 2;
     private static final int    SMALLEST_NON_NEGATIVE    = 0;
     private static final int    MIN_SCORE                = 0;
@@ -37,10 +35,8 @@ public final class Score {
     private static final int    DEFAULT_PREV_HIGH        = 0;
     private static final int    FIRST_ITEM               = 0;
     private static final int    SECOND_ITEM              = 1;
-    private static final int    OFFSET_BY_ONE            = 1;
-    private static final int    OFFSET_BY_TWO            = 2;
-    private static final int    SPLIT_LIMIT              = 2;
     private static final int    EXPECTED_SCORE_DATA_SIZE = 5;
+    private static final int    FINAL_SCORE_DATA_SIZE    = 6;
     private static final int    SECOND_DATA_ITEM         = 1;
     private static final int    THIRD_DATA_ITEM          = 2;
     private static final int    FOURTH_DATA_ITEM         = 3;
@@ -96,29 +92,39 @@ public final class Score {
         }
     }
 
-    public final String getDateTimePlayed()
+    public String getDateTimePlayed()
     {
         return dateTimePlayed;
     }
 
-    public final int getNumGamesPlayed()
+    public int getNumGamesPlayed()
     {
         return numGamesPlayed;
     }
 
-    public final int getNumCorrectFirstAttempt()
+    public int getNumCorrectFirstAttempt()
     {
         return numCorrectFirstAttempt;
     }
 
-    public final int getNumCorrectSecondAttempt()
+    public int getNumCorrectSecondAttempt()
     {
         return numCorrectSecondAttempt;
     }
 
-    public final int getNumIncorrectSecondAttempt()
+    public int getNumIncorrectSecondAttempt()
     {
         return numIncorrectSecondAttempt;
+    }
+
+    public int getScore()
+    {
+        return (numCorrectFirstAttempt * DOUBLE) + numCorrectSecondAttempt;
+    }
+
+    public double getAvgScore()
+    {
+        return (double) getScore() / numGamesPlayed;
     }
 
     /*
@@ -147,7 +153,9 @@ public final class Score {
     }
 
     /**
-     * Records the score into score.txt.
+     * Appends Score objects onto the end of a file.
+     * @param score the score object to be appended onto the file.
+     * @param fileName the name of the file to append the score object onto.
      */
     public static void appendScoreToFile(final Score score,
                                          final String fileName)
@@ -161,7 +169,8 @@ public final class Score {
         filePath = Paths.get(fileName);
 
         checkHighscore(scoreAvg,
-                       filePath);
+                       filePath,
+                       fileName);
 
         final StringBuilder dataOutput;
         dataOutput = new StringBuilder();
@@ -201,14 +210,18 @@ public final class Score {
         }
     }
 
-    public final int getScore()
-    {
-        return (numCorrectFirstAttempt * DOUBLE) + numCorrectSecondAttempt;
-    }
-
+    /*
+     * Gets the previous highscore from the specified file then
+     * hands it off to compareScores to handle the printing of
+     * if this is a new high score.
+     * @param scoreAvg the average score of the play though that just ended.
+     * @param dataPath the path that the data is stored in.
+     * @param fileName the name of the file that the data is stored in.
+     */
     //todo look at modularizing this
     private static void checkHighscore(final double scoreAvg,
-                                       final Path dataPath)
+                                       final Path dataPath,
+                                       final String fileName)
     {
         //if path doesn't exist then it's a new highscore
         if (!Files.exists(dataPath))
@@ -221,67 +234,55 @@ public final class Score {
 
         //todo change this to use the readDataMethod
 
-        final List<String> filteredData;
+        final List<Score> allScores;
+
+        allScores = readScoresFromFile(fileName);
+
         String bestDateTime = "";
         double prevHighScore = MIN_SCORE;
 
-        try
+        //if the file is empty this is a new highscore (handled by compare scores)
+        if (allScores.isEmpty())
         {
-            filteredData = Files.readAllLines(dataPath)
-                    .stream()
-                    .filter(line -> line.startsWith(TOTAL_SCORE_PHRASE) ||
-                            line.startsWith(DATE_TIME_PHRASE) ||
-                            line.startsWith(GAME_PLAYED_PHRASE))
-                    .filter(line -> line.indexOf(": ") == line.lastIndexOf(": "))
-                    .toList();
-
-            for (int i = 0; i < filteredData.size(); i += INCREMENT_AMOUNT)
-            {
-                final String dateTime;
-                final int gamesPlayed;
-                final int totalScore;
-
-
-                //todo remove magic num here
-                dateTime = filteredData.get(i)
-                                .split(": ", SPLIT_LIMIT)[SECOND_ITEM]
-                                .trim();
-
-                gamesPlayed = Integer.parseInt(
-                                filteredData.get(i + OFFSET_BY_ONE)
-                                .split(": ", SPLIT_LIMIT)[SECOND_ITEM]
-                                .trim()
-                                );
-
-                totalScore = Integer.parseInt(
-                                filteredData.get(i + OFFSET_BY_TWO)
-                                .split(": ", SPLIT_LIMIT)[SECOND_ITEM]
-                                .trim()
-                                );
-
-                //logically there should never be 0 games played but just incase I will check
-                if (gamesPlayed > MIN_GAMES_PLAYED) {
-                    double averageScore = (double) totalScore / gamesPlayed;
-
-                    if (averageScore > prevHighScore) {
-                        prevHighScore = averageScore;
-                        bestDateTime = dateTime;
-                    }
-                }
-            }
-
             compareScores(scoreAvg,
                           prevHighScore,
                           bestDateTime);
+            return;
+        }
 
-        }
-        catch (final IOException ex)
+        //get the previous highscore and the time that was placed
+        for (final Score score : allScores)
         {
-            System.out.println("problem reading file: " + ex);
+            double scoreTotal;
+            if (score.numGamesPlayed <= MIN_GAMES_PLAYED)
+            {
+                scoreTotal = MIN_SCORE;
+            }
+            else
+            {
+                scoreTotal = score.getAvgScore();
+            }
+
+            if (scoreTotal > prevHighScore)
+            {
+                bestDateTime = score.dateTimePlayed;
+                prevHighScore = scoreTotal;
+            }
         }
+
+        compareScores(scoreAvg,
+                      prevHighScore,
+                      bestDateTime);
     }
 
 
+    /*
+     * Compares the new score to the previous highscore
+     * and prints the appropriate phrase.
+     * @param scoreAvg the new score that has been placed.
+     * @param prevHighScoreAvg the previous highscore.
+     * @param bestDateTime the time the previous highscore was placed.
+     */
     //todo ensure the prevHigh comes in as a double
     private static void compareScores(final double scoreAvg,
                                       final double prevHighScoreAvg,
@@ -316,6 +317,11 @@ public final class Score {
         }
     }
 
+    /**
+     * Reads a file and attempts to extract a list of scores from it.
+     * @param path the path to the file in String form.
+     * @return A list of score object that have been read in from the file.
+     */
     public static List<Score> readScoresFromFile(final String path)
     {
         final Path  dataPath;
@@ -334,35 +340,35 @@ public final class Score {
 
         scoreData = new ArrayList<>();
 
-        try
-        {
-            Files.lines(dataPath).forEach(line -> {
-                if(!line.isBlank())
-                {
+
+        try (Stream<String> lines = Files.lines(dataPath)) {
+            lines.forEach(line -> {
+                if (!line.isBlank()) {
                     scoreData.add(line);
 
-                    if(scoreData.size() == 6 || line.contains(TOTAL_SCORE_PHRASE))
-                    {
+                    if (scoreData.size() == FINAL_SCORE_DATA_SIZE || line.contains(TOTAL_SCORE_PHRASE)) {
                         final Score newScore = createScoreObject(scoreData);
 
-                        if(newScore != null)
-                        {
+                        if (newScore != null) {
                             scores.add(newScore);
                         }
                         scoreData.clear();
                     }
                 }
             });
-        }
-        catch (final IOException ex)
-        {
+        } catch (final IOException ex) {
             System.out.println("Failed to read file: " + ex);
         }
-
 
         return scores;
     }
 
+    /*
+     * Attempts to create a string object from a list of strings.
+     * @param scoreData A list of data that will be parsed into a Score object.
+     * @return the new score object if it can be created. Else null.
+     */
+    //todo validate each line to ensure all positive else throw it out
     private static Score createScoreObject(final List<String> scoreData)
     {
         final String dateTimeLine;
@@ -426,6 +432,11 @@ public final class Score {
         }
     }
 
+    /**
+     * Custom to String method for the Score Object.
+     * @return all instance variables and the formatted final score
+     * in the specified format.
+     */
     @Override
     public String toString()
     {

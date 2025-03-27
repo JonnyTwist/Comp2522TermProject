@@ -42,6 +42,7 @@ final class World
         countriesValues = new ArrayList<>(countries.values());
     }
 
+    //todo modularize?
     private static void fillCountiesIntoMap(final Map<String, Country> countries)
             throws FileNotFoundException
     {
@@ -92,6 +93,8 @@ final class World
 
                 countries.put(countryName, countryToAdd);
             }
+
+            fileScanner.close();
         }
     }
     //todo close all scanners
