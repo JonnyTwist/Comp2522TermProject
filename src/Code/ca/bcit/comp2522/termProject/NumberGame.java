@@ -1,7 +1,7 @@
 package ca.bcit.comp2522.termProject;
 
 // REQUIRES GUI KNOWLEDGE
-final public class NumberGame
+final class NumberGame
 {
 
 }

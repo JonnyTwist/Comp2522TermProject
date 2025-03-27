@@ -4,8 +4,15 @@ import java.util.Scanner;
 import java.util.Random;
 
 //todo javadoc
+
+/**
+ * todo javadoc
+ * @author Jonny Twist
+ * @version 1.0
+ */
 final class WordGame
 {
+    private static final int    INCORRECT_BOTH_TIMES = 2;
     private static final int    CORRECT_IN_ONE_GUESS = 0;
     private static final int    CORRECT_IN_TWO_GUESS = 1;
     private static final int    INITIAL_ROUND_NUMBER = 1;
@@ -269,7 +276,11 @@ final class WordGame
             }
         }
 
-        //scan.close();
+        if (guessCount == INCORRECT_BOTH_TIMES)
+        {
+            System.out.println("The answer was: " + answer);
+        }
+
         return guessCount;
     }
 }

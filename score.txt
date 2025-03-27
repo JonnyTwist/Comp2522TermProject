@@ -12,3 +12,17 @@ Correct Second Attempts: 0
 Incorrect Attempts: 10
 Total Score: 0
 
+Date and Time: 2025-03-27 14:10:35
+Games Played: 1
+Correct First Attempts: 2
+Correct Second Attempts: 2
+Incorrect Attempts: 6
+Total Score: 6
+
+Date and Time: 2025-03-27 14:12:59
+Games Played: 1
+Correct First Attempts: 0
+Correct Second Attempts: 0
+Incorrect Attempts: 10
+Total Score: 0
+

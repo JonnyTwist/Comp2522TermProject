@@ -48,7 +48,13 @@ public final class Score {
     private final int numCorrectSecondAttempt;
     private final int numIncorrectSecondAttempt;
 
-
+    /**
+     * todo javadoc
+     * @param numGamesPlayed
+     * @param numCorrectFirstAttempt
+     * @param numCorrectSecondAttempt
+     * @param numIncorrectSecondAttempt
+     */
     public Score(final int numGamesPlayed,
                  final int numCorrectFirstAttempt,
                  final int numCorrectSecondAttempt,
@@ -66,12 +72,21 @@ public final class Score {
         this.numIncorrectSecondAttempt = numIncorrectSecondAttempt;
     }
 
+    /**
+     * todo javadoc
+     * @param time
+     * @param numGamesPlayed
+     * @param numCorrectFirstAttempt
+     * @param numCorrectSecondAttempt
+     * @param numIncorrectSecondAttempt
+     */
     public Score(final LocalDateTime time,
                  final int numGamesPlayed,
                  final int numCorrectFirstAttempt,
                  final int numCorrectSecondAttempt,
                  final int numIncorrectSecondAttempt)
     {
+        //todo validate time?
         validateNotNegative(numGamesPlayed);
         validateNotNegative(numCorrectFirstAttempt);
         validateNotNegative(numCorrectSecondAttempt);
@@ -84,6 +99,10 @@ public final class Score {
         this.numIncorrectSecondAttempt = numIncorrectSecondAttempt;
     }
 
+    /*
+     * Validates that a number is not negative
+     * @param num the number to be validated
+     */
     private static void validateNotNegative(final int num)
     {
         if (num < SMALLEST_NON_NEGATIVE)
@@ -92,36 +111,64 @@ public final class Score {
         }
     }
 
+    /**
+     * getter for the dateTime played.
+     * @return the dateTime played.
+     */
     public String getDateTimePlayed()
     {
         return dateTimePlayed;
     }
 
+    /**
+     * Getter for the number of games played.
+     * @return the number of games played.
+     */
     public int getNumGamesPlayed()
     {
         return numGamesPlayed;
     }
 
+    /**
+     * Getter for the number of times the user was correct on the first attempt.
+     * @return return the number of times the user was correct on the first attempt.
+     */
     public int getNumCorrectFirstAttempt()
     {
         return numCorrectFirstAttempt;
     }
 
+    /**
+     * Getter for the number of times the user was correct on the second attempt.
+     * @return return the number of times the user was correct on the second attempt.
+     */
     public int getNumCorrectSecondAttempt()
     {
         return numCorrectSecondAttempt;
     }
 
+    /**
+     * Getter for the number of times the user was incorrect on both attempts.
+     * @return return the number of times the user was in incorrect on both attempts.
+     */
     public int getNumIncorrectSecondAttempt()
     {
         return numIncorrectSecondAttempt;
     }
 
+    /**
+     *
+     * @return
+     */
     public int getScore()
     {
         return (numCorrectFirstAttempt * DOUBLE) + numCorrectSecondAttempt;
     }
 
+    /**
+     * Getter for the average score (total score divided by number of games played)
+     * @return the average score of a Score object.
+     */
     public double getAvgScore()
     {
         return (double) getScore() / numGamesPlayed;
@@ -231,8 +278,6 @@ public final class Score {
                           DEFAULT_PREV_DATE);
             return;
         }
-
-        //todo change this to use the readDataMethod
 
         final List<Score> allScores;
 

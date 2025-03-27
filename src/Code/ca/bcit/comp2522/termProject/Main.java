@@ -62,12 +62,13 @@ final class Main
      */
     private static void promptGameChoice()
     {
+        System.out.println(System.lineSeparator());
         System.out.println("What game would you like to play?");
-        System.out.println("\t-  Word Game (W)");
-        System.out.println("\t-  Number Game (N)");
+        System.out.println("\t-  Word Game (" + WORD_GAME.toUpperCase() + ")");
+        System.out.println("\t-  Number Game (" + NUMBER_GAME.toUpperCase() + ")");
         //todo change game name once I know what it is
-        System.out.println("\t-  My Game (M)");
-        System.out.println("\t-  Quit (Q)");
+        System.out.println("\t-  My Game (" + MY_GAME.toUpperCase() + ")");
+        System.out.println("\t-  Quit (" + QUIT.toUpperCase() + ")");
         System.out.println("Game choice: ");
     }
 
@@ -100,6 +101,12 @@ final class Main
                 }
                 case MY_GAME -> {
                     //todo do my game
+                }
+                case QUIT -> {
+                    System.out.println("Quitting...");;
+                }
+                default -> {
+                    System.out.println("HOW DID I GET HERE!!!");
                 }
             }
 
