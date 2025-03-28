@@ -56,31 +56,10 @@ class ScoreTest {
         // Read scores from the file
         List<Score> scores = Score.readScoresFromFile(SCORE_FILE);
 
-
-
-        System.out.println("All scores");
-        for(final Score score : scores)
-        {
-            System.out.println("\n\n\n=============================");
-            System.out.println(score);
-        }
-        System.out.println("end of all scores");
-
-
-
         // Validate the number of scores and their content
         assertEquals(25, scores.size(), "Twenty-five scores should have been read from the file.");
         for (int i = 0; i < 25; i++) {
             int expectedScore = ((i + 1) * 2) + ((i % 3) + 1);
-
-            //todo delete between
-            System.out.println("\n\n==========================");
-            System.out.println(i);
-            System.out.println(expectedScore);
-            System.out.println(scores.get(i));
-
-            //todo delete above
-
             assertEquals(expectedScore, scores.get(i).getScore(), "Score for entry " + i + " should match the calculated value.");
         }
     }

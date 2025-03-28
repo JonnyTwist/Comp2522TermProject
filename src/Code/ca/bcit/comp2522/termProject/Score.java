@@ -283,7 +283,7 @@ public final class Score {
 
         allScores = readScoresFromFile(fileName);
 
-        String bestDateTime = "";
+        String bestDateTime = DEFAULT_PREV_DATE;
         double prevHighScore = MIN_SCORE;
 
         //if the file is empty this is a new highscore (handled by compare scores)
@@ -335,6 +335,8 @@ public final class Score {
     {
         final String date;
         final String time;
+
+        //todo maybe made a private static variable to replace Congrats with
 
         if (bestDateTime.isBlank())
         {

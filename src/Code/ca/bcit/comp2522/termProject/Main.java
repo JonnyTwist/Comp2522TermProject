@@ -72,6 +72,26 @@ final class Main
         System.out.println("Game choice: ");
     }
 
+    /*
+     * Launches games.
+     * @param gameType the type of game we will try to launch.
+     * @param <T> must implement the playable interface.
+     */
+    private static <T extends Playable> void launch(final Class<T> gameType)
+    {
+        try
+        {
+            final Playable game;
+            game = gameType.getConstructor()
+                    .newInstance();
+            game.play();
+        }
+        catch (final Exception ex)
+        {
+            System.out.println("Cannot find game type: " + ex);
+        }
+    }
+
     /**
      * Drives the program.
      * Allows users to interact with the program using a loop asking them what games
@@ -89,27 +109,24 @@ final class Main
 
             userChoice = getUserGameChoice();
 
-            //todo switch for game choice
-
             switch (userChoice.toLowerCase())
             {
                 case WORD_GAME -> {
-                    WordGame.playWordGame();
+                    launch(WordGame.class);
                 }
                 case NUMBER_GAME -> {
-                    //todo do number game
+                    launch(NumberGame.class);
                 }
                 case MY_GAME -> {
-                    //todo do my game
+                    launch(MyGame.class);
                 }
                 case QUIT -> {
-                    System.out.println("Quitting...");;
+                    System.out.println("Quitting...");
                 }
                 default -> {
                     System.out.println("HOW DID I GET HERE!!!");
                 }
             }
-
 
         } while (!(userChoice.equalsIgnoreCase(QUIT)));
     }

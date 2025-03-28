@@ -10,7 +10,7 @@ import java.util.Random;
  * @author Jonny Twist
  * @version 1.0
  */
-final class WordGame
+public final class WordGame implements Playable
 {
     private static final int    INCORRECT_BOTH_TIMES = 2;
     private static final int    CORRECT_IN_ONE_GUESS = 0;
@@ -33,14 +33,14 @@ final class WordGame
     private static int correctInTwoCounter = 0;
     private static int incorrectCounter    = 0;
 
-
     /**
      * The starting point of the word game.
      * Runs 10 rounds then asks the user if they want to play again.
      * If they don't want to play again then the score is saved and
      * the static variables are reset.
      */
-    static void playWordGame()
+    @Override
+    public void play()
     {
         String keepPlaying;
         final Score score;
