@@ -8,7 +8,11 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.scene.control.Button;
 
+
 import java.util.Random;
+
+//todo remove after fully testing winning
+import java.util.Arrays;
 
 /*
 make at least one interface, one abstract class,
@@ -35,6 +39,7 @@ public final class NumberGame
     private static final int MAX_NUM               = 1001;
     private static final int TOTAL_CHOSEN_NUMS     = 25;
     private static final int STARTING_CHOSEN_SQUARES = 0;
+    private static final int STARTING_PREVIOUS = 0;
 
     private final int[] chosenNums;
     private final Button[][] buttons;
@@ -48,6 +53,11 @@ public final class NumberGame
         this.chosenSquares = STARTING_CHOSEN_SQUARES;
     }
 
+    /**
+     * Calls all required methods to set up the game
+     * and start it.
+     * @param primaryStage the stage that we will place our javaFX items.
+     */
     public void start(final Stage primaryStage)
     {
         final Scene scene;
@@ -78,14 +88,44 @@ public final class NumberGame
         {
             chosenNums[i] = roll(MIN_NUM, MAX_NUM);
         }
+
+        //todo remove after fully testing winning
+
+//        // Sort the array
+//        Arrays.sort(chosenNums);
+//
+//        // Print each number with an index (1 - 25)
+//        for (int i = 0; i < chosenNums.length; i++) {
+//            System.out.println((i + 1) + ": " + chosenNums[i]);
+//        }
     }
 
     //todo finish this
     public int roll(final int min, final int max)
     {
         final Random rand;
+        int num;
+
         rand = new Random();
-        return rand.nextInt(min, max);
+
+        do
+        {
+            num = rand.nextInt(min, max);
+        } while(containsNum(chosenNums, num));
+
+        return num;
+    }
+
+    private static boolean containsNum(final int[] arr, final int num)
+    {
+        for(final int item : arr)
+        {
+            if(item == num)
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
     private Scene prepareScene()
@@ -140,9 +180,47 @@ public final class NumberGame
 
         chosenSquares++;
 
-        checkWin();
+        if (chosenSquares == TOTAL_CHOSEN_NUMS)
+        {
+            userWins();
+        }
     }
 
+    private void checkLose()
+    {
+        int previous = STARTING_PREVIOUS;
+        int current;
+
+        for (int i = 0; i < GRID_SIZE; i++)
+        {
+            for (int j = 0; j < GRID_SIZE; j++)
+            {
+                if (!buttons[i][j].getText().isBlank())
+                {
+                    current = Integer.parseInt(buttons[i][j].getText());
+                    if (current < previous)
+                    {
+                        loseGame();
+                    }
+                    previous = current;
+                }
+            }
+        }
+    }
+
+    private void loseGame()
+    {
+        System.out.println("YOU LOST THE GAME!");
+    }
+
+    private static void userWins()
+    {
+        System.out.println("Congrats you won!");
+    }
+
+    /**
+     * Entry point for the NumberGame game.
+     */
     public void play()
     {
         Platform.runLater(() -> {
