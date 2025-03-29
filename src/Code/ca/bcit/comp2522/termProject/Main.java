@@ -1,5 +1,7 @@
 package ca.bcit.comp2522.termProject;
 
+import javafx.application.Platform;
+
 import java.util.Scanner;
 
 /**
@@ -77,7 +79,7 @@ final class Main
      * @param gameType the type of game we will try to launch.
      * @param <T> must implement the playable interface.
      */
-    private static <T extends Playable> void launch(final Class<T> gameType)
+    private static <T extends Playable> void launchGame(final Class<T> gameType)
     {
         try
         {
@@ -88,7 +90,7 @@ final class Main
         }
         catch (final Exception ex)
         {
-            System.out.println("Cannot find game type: " + ex);
+            System.out.println("Game launch failed: " + ex);
         }
     }
 
@@ -102,6 +104,9 @@ final class Main
     {
         String userChoice;
 
+        //open the application thread
+        Platform.startup(() -> {});
+
         do
         {
 
@@ -112,13 +117,13 @@ final class Main
             switch (userChoice.toLowerCase())
             {
                 case WORD_GAME -> {
-                    launch(WordGame.class);
+                    launchGame(WordGame.class);
                 }
                 case NUMBER_GAME -> {
-                    launch(NumberGame.class);
+                    launchGame(NumberGame.class);
                 }
                 case MY_GAME -> {
-                    launch(MyGame.class);
+                    launchGame(MyGame.class);
                 }
                 case QUIT -> {
                     System.out.println("Quitting...");
@@ -129,5 +134,9 @@ final class Main
             }
 
         } while (!(userChoice.equalsIgnoreCase(QUIT)));
+
+        //close the thread
+        Platform.exit();
+
     }
 }
