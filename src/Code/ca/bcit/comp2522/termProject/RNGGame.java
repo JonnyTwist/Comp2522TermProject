@@ -1,7 +1,6 @@
 package ca.bcit.comp2522.termProject;
 
 import javafx.application.Application;
-import java.util.Random;
 
 /**
  * An abstract class for javaFX games based on Random Number Generator.
