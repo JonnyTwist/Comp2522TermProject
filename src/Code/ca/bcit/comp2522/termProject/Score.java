@@ -49,36 +49,40 @@ public final class Score {
     private final int numIncorrectSecondAttempt;
 
     /**
-     * todo javadoc
-     * @param numGamesPlayed
-     * @param numCorrectFirstAttempt
-     * @param numCorrectSecondAttempt
-     * @param numIncorrectSecondAttempt
+     * Constructor for the score object that doesn't take a time.
+     * Calls the other constructor and hands in now() as the time.
+     *
+     * @param numGamesPlayed the number of games played.
+     * @param numCorrectFirstAttempt the number of times the user
+     *                               was correct on the first attempt.
+     * @param numCorrectSecondAttempt the number of times the user
+     *                                was correct on the second attempt.
+     * @param numIncorrectSecondAttempt the number of times the user
+     *                                  was incorrect on both attempts.
      */
     public Score(final int numGamesPlayed,
                  final int numCorrectFirstAttempt,
                  final int numCorrectSecondAttempt,
                  final int numIncorrectSecondAttempt)
     {
-        validateNotNegative(numGamesPlayed);
-        validateNotNegative(numCorrectFirstAttempt);
-        validateNotNegative(numCorrectSecondAttempt);
-        validateNotNegative(numIncorrectSecondAttempt);
-
-        dateTimePlayed = formatTime(null);
-        this.numGamesPlayed = numGamesPlayed;
-        this.numCorrectFirstAttempt = numCorrectFirstAttempt;
-        this.numCorrectSecondAttempt = numCorrectSecondAttempt;
-        this.numIncorrectSecondAttempt = numIncorrectSecondAttempt;
+        this(LocalDateTime.now(),
+             numGamesPlayed,
+             numCorrectFirstAttempt,
+             numCorrectSecondAttempt,
+             numIncorrectSecondAttempt);
     }
 
     /**
-     * todo javadoc
-     * @param time
-     * @param numGamesPlayed
-     * @param numCorrectFirstAttempt
-     * @param numCorrectSecondAttempt
-     * @param numIncorrectSecondAttempt
+     * Constructor for the complete score object.
+     *
+     * @param time the time the game ended.
+     * @param numGamesPlayed the number of games played.
+     * @param numCorrectFirstAttempt the number of times the user
+     *                               was correct on the first attempt.
+     * @param numCorrectSecondAttempt the number of times the user
+     *                                was correct on the second attempt.
+     * @param numIncorrectSecondAttempt the number of times the user
+     *                                  was incorrect on both attempts.
      */
     public Score(final LocalDateTime time,
                  final int numGamesPlayed,
@@ -86,7 +90,7 @@ public final class Score {
                  final int numCorrectSecondAttempt,
                  final int numIncorrectSecondAttempt)
     {
-        //todo validate time?
+        validateDateTime(time);
         validateNotNegative(numGamesPlayed);
         validateNotNegative(numCorrectFirstAttempt);
         validateNotNegative(numCorrectSecondAttempt);
@@ -97,6 +101,20 @@ public final class Score {
         this.numCorrectFirstAttempt = numCorrectFirstAttempt;
         this.numCorrectSecondAttempt = numCorrectSecondAttempt;
         this.numIncorrectSecondAttempt = numIncorrectSecondAttempt;
+    }
+
+    /*
+     * Validates that the date time is not in the future.
+     * Note: does not validate that it is not null because that is
+     * handled by the formatTime method.
+     * @param time the time to validate.
+     */
+    private static void validateDateTime(final LocalDateTime time)
+    {
+        if (time != null && time.isAfter(LocalDateTime.now()))
+        {
+            throw new IllegalArgumentException("Time cannot be in the future");
+        }
     }
 
     /*
@@ -157,8 +175,9 @@ public final class Score {
     }
 
     /**
-     *
-     * @return
+     * Calculates the total score.
+     * Note: this is not the average score.
+     * @return the total score ((first try x 2) + (second try x 1)).
      */
     public int getScore()
     {
