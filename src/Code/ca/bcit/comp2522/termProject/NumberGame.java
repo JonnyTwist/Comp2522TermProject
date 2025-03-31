@@ -3,9 +3,11 @@ package ca.bcit.comp2522.termProject;
 
 import javafx.application.Platform;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -36,7 +38,8 @@ public final class NumberGame
         extends RNGGame
         implements Playable
 {
-
+    private static final int NO_GAMES_PLAYED         = 0;
+    private static final int SINGULAR                = 1;
     private static final int DEFAULT_INT             = 0;
     private static final int GRID_WIDTH              = 5;
     private static final int GRID_HEIGHT             = 4;
@@ -53,6 +56,8 @@ public final class NumberGame
     private static final int DEFAULT_PADDING_PX      = 10;
     private static final String DEFAULT_BTN_TEXT     = "[ ]";
     private static final String PLAY_AGAIN_TEXT      = "Play Again";
+    private static final String ACTIVE_BTN           = "active";
+    private static final String INACTIVE_BTN         = "inactive";
 
     private final int[] chosenNums;
     private final Button[][] buttons;
@@ -60,27 +65,39 @@ public final class NumberGame
     private final Label      displayNextNum;
     private final CountDownLatch latch;
     private final int[] placedNums;
+    private int gamesPlayed;
+    private int gamesLost;
+    private int successfulPlacements;
+    private Stage primaryStage;
 
     /**
      * Constructor for a number game object.
      */
     public NumberGame()
     {
-        this.chosenNums = new int[TOTAL_CHOSEN_NUMS];
+        this.chosenNums       = new int[TOTAL_CHOSEN_NUMS];
         this.buttons          = new Button[GRID_HEIGHT][GRID_WIDTH];
         this.numChosenSquares = STARTING_CHOSEN_SQUARES;
+
+        //todo style the label
         this.displayNextNum   = new Label();
-        this.placedNums = new int[TOTAL_CHOSEN_NUMS];
-        this.latch = new CountDownLatch(SINGLE_THREAD);
+        this.placedNums       = new int[TOTAL_CHOSEN_NUMS];
+        this.latch            = new CountDownLatch(SINGLE_THREAD);
+
+        this.gamesPlayed          = 0;
+        this.gamesLost            = 0;
+        this.successfulPlacements = 0;
+        //this.primaryStage         = new Stage();
     }
 
     /**
      * Calls all required methods to set up the game
      * and start it.
-     * @param primaryStage the stage that we will place our javaFX items.
      */
-    public void start(final Stage primaryStage)
+    public void start(final Stage stage)
     {
+        primaryStage = stage;
+
         final Scene scene;
 
         Platform.setImplicitExit(false);
@@ -100,7 +117,51 @@ public final class NumberGame
             latch.countDown();
         });
 
+        try
+        {
+            scene.getStylesheets()
+                    .add(getClass().getResource("/numberGameStyles.css")
+                                 .toExternalForm());
+            System.out.println("styles loaded");
+        }
+        catch(final NullPointerException e)
+        {
+            System.out.println("Error: Could not find stylesheet");
+        }
+
         primaryStage.show();
+
+        primaryStage.toFront();
+        primaryStage.requestFocus();
+
+        showOpeningAlert(primaryStage);
+
+        gamesPlayed++;
+    }
+
+    /*
+     * Shows an opening alert to welcome the user to the game.
+     * @param primaryStage the primary stage that the user sees.
+     */
+    private void showOpeningAlert(final Stage primaryStage)
+    {
+        final Alert alert;
+        final ButtonType playBtn;
+
+        alert = new Alert(Alert.AlertType.NONE);
+        alert.setTitle("Number Game!");
+        alert.setContentText("Welcome to the number game challenge! Press 'Start' to begin.");
+
+        playBtn = new ButtonType("Start");
+
+        alert.getButtonTypes().setAll(playBtn);
+
+        // brings the alert and primary stage to the front when
+        // the game is launched.
+        alert.initModality(Modality.APPLICATION_MODAL);
+        alert.initOwner(primaryStage);
+
+        alert.showAndWait();
     }
 
     /*
@@ -128,6 +189,7 @@ public final class NumberGame
      * @param max the maximum number to be rolled (not inclusive)
      * @return a random number in between.
      */
+    @Override
     public int roll(final int min, final int max)
     {
         final Random rand;
@@ -217,6 +279,8 @@ public final class NumberGame
                 btn.setMinSize(BTN_SIZE_PX,BTN_SIZE_PX);
                 btn.setMaxSize(BTN_SIZE_PX, BTN_SIZE_PX);
 
+                btn.getStyleClass().add(ACTIVE_BTN);
+
                 btn.setOnAction(e->updateButton(btn, index));
                 btn.setText(DEFAULT_BTN_TEXT);
 
@@ -238,7 +302,10 @@ public final class NumberGame
         {
             btn.setText(Integer.toString(chosenNums[numChosenSquares]));
             btn.setDisable(true);
+            btn.getStyleClass().remove(ACTIVE_BTN);
+            btn.getStyleClass().add(INACTIVE_BTN);
 
+            successfulPlacements++;
             numChosenSquares++;
 
             if(numChosenSquares == TOTAL_CHOSEN_NUMS)
@@ -317,6 +384,7 @@ public final class NumberGame
 
         if (!placeAble)
         {
+            gamesLost++;
             final String loseMessage;
             loseMessage = generateLoseMessage(nextNum);
             loseGame(loseMessage);
@@ -386,7 +454,10 @@ public final class NumberGame
     //todo comment
     private void restartGame()
     {
-        System.out.println("Restarting...");
+        //todo remove these
+        System.out.println(gamesPlayed);
+        System.out.println(gamesLost);
+        System.out.println(successfulPlacements);
 
         this.numChosenSquares = STARTING_CHOSEN_SQUARES;
 
@@ -394,6 +465,8 @@ public final class NumberGame
         {
             placedNums[i] = DEFAULT_INT;
         }
+
+        gamesPlayed++;
 
         resetButtons();
         chooseNumbers();
@@ -409,15 +482,53 @@ public final class NumberGame
             for (final Button btn : row)
             {
                 btn.setText(DEFAULT_BTN_TEXT);
+                btn.getStyleClass().remove(INACTIVE_BTN);
+                btn.getStyleClass().add(ACTIVE_BTN);
                 btn.setDisable(false);
             }
         }
     }
 
-    //todo do
+    //todo do this and show an alert with this message
     private void showFinalScore()
     {
-        System.out.println("I need to show the score here");
+        final StringBuilder msg;
+        msg = new StringBuilder();
+
+        if (gamesPlayed != NO_GAMES_PLAYED)
+        {
+            if (gamesLost == gamesPlayed)
+            {
+                msg.append("You lost ")
+                        .append(gamesLost)
+                        .append(" out of ")
+                        .append(gamesPlayed);
+
+                if (gamesPlayed > SINGULAR)
+                {
+                    msg.append(" games");
+                }
+                else
+                {
+                    msg.append(" game");
+                }
+            }
+            else
+            {
+                System.out.println("cheese");
+            }
+
+            msg.append(", with ")
+                    .append(successfulPlacements)
+                    .append(" successful placements, an average of ");
+        }
+        else
+        {
+            msg.append("Something went terribly wrong... no games were played");
+        }
+
+        //todo finish this method
+
     }
 
     /**

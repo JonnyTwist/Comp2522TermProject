@@ -1,5 +1,10 @@
 package ca.bcit.comp2522.termProject;
 
+/**
+ * A functional interface for my games.
+ * @author Jonny Twist
+ * @version 1.0
+ */
 @FunctionalInterface
 public interface Playable
 {
