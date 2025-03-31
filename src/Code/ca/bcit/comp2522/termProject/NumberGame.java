@@ -8,6 +8,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 
 
 import javafx.scene.control.Alert;
@@ -36,6 +37,7 @@ public final class NumberGame
         implements Playable
 {
 
+    private static final int DEFAULT_INT             = 0;
     private static final int GRID_WIDTH              = 5;
     private static final int GRID_HEIGHT             = 4;
     private static final int BTN_SIZE_PX             = 100;
@@ -46,26 +48,30 @@ public final class NumberGame
     private static final int TOTAL_CHOSEN_NUMS       = 20;
     private static final int STARTING_CHOSEN_SQUARES = 0;
     private static final int STARTING_PREVIOUS       = 0;
+    private static final int FIRST_ITEM              = 0;
     private static final int SINGLE_THREAD           = 1;
     private static final int DEFAULT_PADDING_PX      = 10;
     private static final String DEFAULT_BTN_TEXT     = "[ ]";
+    private static final String PLAY_AGAIN_TEXT      = "Play Again";
 
     private final int[] chosenNums;
     private final Button[][] buttons;
-    private int chosenSquares;
+    private int              numChosenSquares;
+    private final Label      displayNextNum;
     private final CountDownLatch latch;
+    private final int[] placedNums;
 
     /**
      * Constructor for a number game object.
      */
     public NumberGame()
     {
-        super();
         this.chosenNums = new int[TOTAL_CHOSEN_NUMS];
-        this.buttons = new Button[GRID_HEIGHT][GRID_WIDTH];
-        this.chosenSquares = STARTING_CHOSEN_SQUARES;
+        this.buttons          = new Button[GRID_HEIGHT][GRID_WIDTH];
+        this.numChosenSquares = STARTING_CHOSEN_SQUARES;
+        this.displayNextNum   = new Label();
+        this.placedNums = new int[TOTAL_CHOSEN_NUMS];
         this.latch = new CountDownLatch(SINGLE_THREAD);
-
     }
 
     /**
@@ -81,9 +87,9 @@ public final class NumberGame
 
         prepareButtons();
 
-        scene = prepareScene();
-
         chooseNumbers();
+
+        scene = prepareScene();
 
         primaryStage.setTitle("Number Game");
         primaryStage.setScene(scene);
@@ -170,6 +176,10 @@ public final class NumberGame
                           DEFAULT_WIDTH_PX,
                           DEFAULT_HEIGHT_PX);
 
+        displayNextNum.setText("Next number is: " + chosenNums[FIRST_ITEM]);
+
+        vbox.getChildren().add(displayNextNum);
+
         for (int i = 0; i < GRID_HEIGHT; i++)
         {
             final HBox hbox;
@@ -198,12 +208,16 @@ public final class NumberGame
         {
             for (int j = 0; j < GRID_WIDTH; j++)
             {
+                final int index;
                 final Button btn;
+
+                index = i * GRID_WIDTH + j;
+
                 btn = new Button();
                 btn.setMinSize(BTN_SIZE_PX,BTN_SIZE_PX);
                 btn.setMaxSize(BTN_SIZE_PX, BTN_SIZE_PX);
 
-                btn.setOnAction(e->updateButton(btn));
+                btn.setOnAction(e->updateButton(btn, index));
                 btn.setText(DEFAULT_BTN_TEXT);
 
                 buttons[i][j] = btn;
@@ -216,19 +230,61 @@ public final class NumberGame
      * and deactivates it from further use.
      * @param btn the button to be activated.
      */
-    private void updateButton(final Button btn)
+    private void updateButton(final Button btn,
+                              final int index)
     {
-        btn.setText(Integer.toString(chosenNums[chosenSquares]));
-        btn.setDisable(true);
-
-        checkLose();
-
-        chosenSquares++;
-
-        if (chosenSquares == TOTAL_CHOSEN_NUMS)
+        placedNums[index] = chosenNums[numChosenSquares];
+        if (checkValid())
         {
-            userWins();
+            btn.setText(Integer.toString(chosenNums[numChosenSquares]));
+            btn.setDisable(true);
+
+            numChosenSquares++;
+
+            if(numChosenSquares == TOTAL_CHOSEN_NUMS)
+            {
+                createPopUp("You Win!",
+                            "Press '" + PLAY_AGAIN_TEXT + "' to play again!");
+            }
+            else
+            {
+                checkLose();
+                displayNextNum.setText("Next number is: " + chosenNums[numChosenSquares]);
+            }
         }
+        else
+        {
+            placedNums[index] = DEFAULT_INT;
+        }
+    }
+
+    /*
+     * Checks if the array of placed ints is still valid
+     * when the user clicks on a button (prevents incorrect placement).
+     * @return true if it's a valid placement. Else False.
+     */
+    private boolean checkValid()
+    {
+        //todo look at changing this so it only compares what was just placed
+        // take in an index then
+        int previous;
+        int current;
+
+        previous = STARTING_PREVIOUS;
+
+        for (int i = 0; i < TOTAL_CHOSEN_NUMS; i++)
+        {
+            if (placedNums[i] != DEFAULT_INT)
+            {
+                current = placedNums[i];
+                if (current < previous)
+                {
+                    return false;
+                }
+                previous = current;
+            }
+        }
+        return true;
     }
 
     /*
@@ -236,51 +292,58 @@ public final class NumberGame
      */
     private void checkLose()
     {
-        int previous = STARTING_PREVIOUS;
-        int current;
 
-        for (int i = 0; i < GRID_HEIGHT; i++)
+        final int nextNum;
+        boolean placeAble;
+
+        nextNum = chosenNums[numChosenSquares];
+        placeAble = false;
+
+        // simulates if the next number were to be placed in each remaining
+        // 0 and checks if it would be valid like that (checks one at a time).
+        // returns the value to a 0 after simulating it.
+        for (int i = 0; i < TOTAL_CHOSEN_NUMS && !placeAble; i++)
         {
-            for (int j = 0; j < GRID_WIDTH; j++)
+            if (placedNums[i] == DEFAULT_INT)
             {
-                if (isInteger(buttons[i][j].getText()))
+                placedNums[i] = nextNum;
+                if (checkValid())
                 {
-                    current = Integer.parseInt(buttons[i][j].getText());
-                    if (current < previous)
-                    {
-                        loseGame();
-                    }
-                    previous = current;
+                    placeAble = true;
                 }
+                placedNums[i] = DEFAULT_INT;
             }
+        }
+
+        if (!placeAble)
+        {
+            final String loseMessage;
+            loseMessage = generateLoseMessage(nextNum);
+            loseGame(loseMessage);
         }
     }
 
-    /*
-     * Checks if a String is an integer.
-     * @param str the string to check.
-     * @return true if it can be parsed as an int. Else false.
-     */
-    private static boolean isInteger(final String str)
+    private static String generateLoseMessage(final int unplaceableNumber)
     {
-        try
-        {
-            Integer.parseInt(str);
-            return true;
-        }
-        catch (final NumberFormatException ex)
-        {
-            return false;
-        }
+        final StringBuilder sb;
+
+        sb = new StringBuilder();
+
+        sb.append("The next number (")
+                .append(unplaceableNumber)
+                .append(") cannot be placed. ")
+                .append(PLAY_AGAIN_TEXT)
+                .append("?");
+
+        return sb.toString();
+
     }
 
     /*
      * todo javadoc and do this
      */
-    private void loseGame()
+    private void loseGame(final String loseMessage)
     {
-        System.out.println("YOU LOST THE GAME!");
-
         for (final Button[] btnArr : buttons)
         {
             for (final Button btn : btnArr)
@@ -288,23 +351,23 @@ public final class NumberGame
                 btn.setDisable(true);
             }
         }
+        createPopUp("You lose!", loseMessage);
     }
 
-    /*
-     * When the user wins this method will create a pop-up to
-     * congratulate them and ask if they want to play again or quit.
-     */
-    private void userWins() {
+    //todo use this to modularize win and lose
+    private void createPopUp(final String title,
+                             final String message)
+    {
         final Alert alert;
         final ButtonType playAgainBtn;
         final ButtonType quitBtn;
 
 
         alert = new Alert(Alert.AlertType.NONE);
-        alert.setTitle("You Win!");
-        alert.setContentText("Game Over! Press 'Play Again' to play again!");
+        alert.setTitle(title);
+        alert.setContentText(message);
 
-        playAgainBtn = new ButtonType("Play Again");
+        playAgainBtn = new ButtonType(PLAY_AGAIN_TEXT);
         quitBtn = new ButtonType("Quit");
 
         alert.getButtonTypes().setAll(playAgainBtn, quitBtn);
@@ -320,21 +383,22 @@ public final class NumberGame
         });
     }
 
-    //todo use this to modularize win and lose
-    private void createPopUp()
-    {
-
-    }
-
     //todo comment
     private void restartGame()
     {
         System.out.println("Restarting...");
 
-        this.chosenSquares = STARTING_CHOSEN_SQUARES;
+        this.numChosenSquares = STARTING_CHOSEN_SQUARES;
+
+        for (int i = 0; i < TOTAL_CHOSEN_NUMS; i++)
+        {
+            placedNums[i] = DEFAULT_INT;
+        }
 
         resetButtons();
         chooseNumbers();
+
+        displayNextNum.setText("Next number is: " + chosenNums[FIRST_ITEM]);
     }
 
     //todo comment
