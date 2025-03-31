@@ -79,7 +79,6 @@ public final class NumberGame
         this.buttons          = new Button[GRID_HEIGHT][GRID_WIDTH];
         this.numChosenSquares = STARTING_CHOSEN_SQUARES;
 
-        //todo style the label
         this.displayNextNum   = new Label();
         this.placedNums       = new int[TOTAL_CHOSEN_NUMS];
         this.latch            = new CountDownLatch(SINGLE_THREAD);
@@ -87,7 +86,8 @@ public final class NumberGame
         this.gamesPlayed          = 0;
         this.gamesLost            = 0;
         this.successfulPlacements = 0;
-        //this.primaryStage         = new Stage();
+
+        displayNextNum.setId("mainLabel");
     }
 
     /**
@@ -122,7 +122,6 @@ public final class NumberGame
             scene.getStylesheets()
                     .add(getClass().getResource("/numberGameStyles.css")
                                  .toExternalForm());
-            System.out.println("styles loaded");
         }
         catch(final NullPointerException e)
         {
@@ -391,6 +390,11 @@ public final class NumberGame
         }
     }
 
+    /*
+     * Generates the message when the user cannot place the next number.
+     * @param unplaceableNumber the number that cannot be placed.
+     * @return the message as a String.
+     */
     private static String generateLoseMessage(final int unplaceableNumber)
     {
         final StringBuilder sb;
@@ -408,7 +412,8 @@ public final class NumberGame
     }
 
     /*
-     * todo javadoc and do this
+     * Disables all the buttons and requests an alert pop up.
+     * @param loseMessage the message thats passed to the pop up.
      */
     private void loseGame(final String loseMessage)
     {
@@ -422,7 +427,11 @@ public final class NumberGame
         createPopUp("You lose!", loseMessage);
     }
 
-    //todo use this to modularize win and lose
+    /*
+     * Creates a pop-up for when the user wins or loses.
+     * @param title the title of the pop-up.
+     * @param message the message of the pop-up.
+     */
     private void createPopUp(final String title,
                              final String message)
     {
@@ -446,19 +455,42 @@ public final class NumberGame
             }
             else
             {
-                showFinalScore();
+                final String finalScoreMessage;
+                finalScoreMessage = createScoreMessage();
+                showFinalScore(finalScoreMessage);
             }
         });
     }
 
-    //todo comment
+    /*
+     * todo check about making the pop up appear when the user continues as well.
+     * Creates a pop-up alert to show the final Score before the user exits.
+     * @param message the pop up message.
+     */
+    private void showFinalScore(final String message)
+    {
+        final Alert alert;
+        final ButtonType closeBtn;
+
+        alert = new Alert(Alert.AlertType.NONE);
+        alert.setTitle("Thank you for playing");
+        alert.setContentText(message);
+
+        closeBtn = new ButtonType("Close");
+
+        alert.getButtonTypes().setAll(closeBtn);
+
+        alert.showAndWait().ifPresent(response -> {
+            primaryStage.hide();
+            latch.countDown();
+        });
+    }
+
+    /*
+     * Prepares the game to be played again.
+     */
     private void restartGame()
     {
-        //todo remove these
-        System.out.println(gamesPlayed);
-        System.out.println(gamesLost);
-        System.out.println(successfulPlacements);
-
         this.numChosenSquares = STARTING_CHOSEN_SQUARES;
 
         for (int i = 0; i < TOTAL_CHOSEN_NUMS; i++)
@@ -474,7 +506,10 @@ public final class NumberGame
         displayNextNum.setText("Next number is: " + chosenNums[FIRST_ITEM]);
     }
 
-    //todo comment
+    /*
+     * Returns the buttons to their starting state without creating new
+     * buttons.
+     */
     private void resetButtons()
     {
         for (final Button[] row : buttons)
@@ -489,8 +524,13 @@ public final class NumberGame
         }
     }
 
-    //todo do this and show an alert with this message
-    private void showFinalScore()
+    /*
+     * todo modularize / make shorter
+     * creates a message to show the user their statistics from
+     * playing the number game.
+     * @return the message we generated.
+     */
+    private String createScoreMessage()
     {
         final StringBuilder msg;
         msg = new StringBuilder();
@@ -515,19 +555,47 @@ public final class NumberGame
             }
             else
             {
-                System.out.println("cheese");
+                msg.append("You won ")
+                        .append(gamesPlayed - gamesLost)
+                        .append(" out of ")
+                        .append(gamesPlayed);
+
+                if (gamesPlayed > SINGULAR)
+                {
+                    msg.append(" games");
+                }
+                else
+                {
+                    msg.append(" game");
+                }
+
+                msg.append(" and you lost ")
+                        .append(gamesLost)
+                        .append(" out of ")
+                        .append(gamesPlayed);
+
+                if (gamesPlayed > SINGULAR)
+                {
+                    msg.append(" games");
+                }
+                else
+                {
+                    msg.append(" game");
+                }
             }
 
             msg.append(", with ")
                     .append(successfulPlacements)
-                    .append(" successful placements, an average of ");
+                    .append(" successful placements, an average of ")
+                    .append((double) successfulPlacements / gamesPlayed)
+                    .append(" per game.");
         }
         else
         {
             msg.append("Something went terribly wrong... no games were played");
         }
 
-        //todo finish this method
+        return msg.toString();
 
     }
 

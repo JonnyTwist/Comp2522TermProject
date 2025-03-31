@@ -23,3 +23,9 @@ VBox {
     -fx-border-width: 1;
     -fx-border-radius: 5;
 }
+
+#mainLabel {
+    -fx-font-size: 20px;
+    -fx-text-fill: #073717;
+    -fx-font-weight: bold;
+}
