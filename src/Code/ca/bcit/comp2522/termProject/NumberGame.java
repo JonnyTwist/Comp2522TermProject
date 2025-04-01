@@ -178,7 +178,7 @@ public final class NumberGame
         //todo remove after fully testing winning
 
         // Sort the array
-        Arrays.sort(chosenNums);
+        //Arrays.sort(chosenNums);
     }
 
     /**

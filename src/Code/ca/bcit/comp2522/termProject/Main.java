@@ -69,7 +69,7 @@ final class Main
         System.out.println("\t-  Word Game (" + WORD_GAME.toUpperCase() + ")");
         System.out.println("\t-  Number Game (" + NUMBER_GAME.toUpperCase() + ")");
         //todo change game name once I know what it is
-        System.out.println("\t-  My Game (" + MY_GAME.toUpperCase() + ")");
+        System.out.println("\t-  Tablut (" + MY_GAME.toUpperCase() + ")");
         System.out.println("\t-  Quit (" + QUIT.toUpperCase() + ")");
         System.out.println("Game choice: ");
     }
@@ -123,7 +123,7 @@ final class Main
                     launchGame(NumberGame.class);
                 }
                 case MY_GAME -> {
-                    launchGame(MyGame.class);
+                    launchGame(TablutSpinoff.class);
                 }
                 case QUIT -> {
                     System.out.println("Quitting...");
