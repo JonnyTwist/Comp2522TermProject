@@ -1,4 +1,4 @@
-package ca.bcit.comp2522.termProject;
+package ca.bcit.comp2522.termProject.myGame;
 
 import javafx.scene.control.Alert;
 

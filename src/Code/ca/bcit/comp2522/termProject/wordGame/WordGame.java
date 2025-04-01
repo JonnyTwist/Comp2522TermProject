@@ -1,4 +1,6 @@
-package ca.bcit.comp2522.termProject;
+package ca.bcit.comp2522.termProject.wordGame;
+
+import ca.bcit.comp2522.termProject.Playable;
 
 import java.util.Scanner;
 import java.util.Random;
@@ -42,7 +44,7 @@ public final class WordGame implements Playable
     @Override
     public void play()
     {
-        String keepPlaying;
+        String      keepPlaying;
         final Score score;
 
         do

@@ -1,4 +1,4 @@
-package ca.bcit.comp2522.termProject;
+package ca.bcit.comp2522.termProject.numberGame;
 
 import javafx.application.Application;
 

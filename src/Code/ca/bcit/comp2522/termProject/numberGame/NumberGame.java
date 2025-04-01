@@ -1,9 +1,9 @@
-package ca.bcit.comp2522.termProject;
+package ca.bcit.comp2522.termProject.numberGame;
 
 
+import ca.bcit.comp2522.termProject.Playable;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -20,7 +20,7 @@ import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 
 //todo remove after fully testing winning
-import java.util.Arrays;
+
 
 /*
 make at least one interface, one abstract class,

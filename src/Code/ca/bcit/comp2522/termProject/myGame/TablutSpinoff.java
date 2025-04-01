@@ -1,12 +1,12 @@
-package ca.bcit.comp2522.termProject;
+package ca.bcit.comp2522.termProject.myGame;
 
 // AI IS ALLOWED ON MY OWN GAME
 // MUST BE UNIQUE
 
+import ca.bcit.comp2522.termProject.Playable;
 import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;

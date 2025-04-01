@@ -1,4 +1,4 @@
-package ca.bcit.comp2522.termProject;
+package ca.bcit.comp2522.termProject.myGame;
 
 import javafx.scene.layout.*;
 import javafx.scene.paint.*;
@@ -11,9 +11,9 @@ import java.nio.file.Path;
 import java.util.stream.*;
 
 public class TablutBoard extends GridPane {
-    private static final int SIZE = 9;
-    private final TablutGame game;
-    private final Rectangle[][] squares = new Rectangle[SIZE][SIZE];
+    private static final int           SIZE = 9;
+    private final        TablutGame    game;
+    private final        Rectangle[][] squares = new Rectangle[SIZE][SIZE];
     private final ImageView[][] pieces = new ImageView[SIZE][SIZE];
 
     public TablutBoard(TablutGame game) {

@@ -1,18 +1,22 @@
-package ca.bcit.comp2522.termProject;
+package ca.bcit.comp2522.termProject.myGame;
 
 // TablutGame.java
+
+import ca.bcit.comp2522.termProject.Playable;
+
 import java.io.*;
 import java.nio.file.*;
 import java.util.*;
 import java.util.stream.*;
 
-public class TablutGame implements Playable {
-    private Player currentPlayer;
-    private Piece[][] board;
+public class TablutGame implements Playable
+{
+    private       Player             currentPlayer;
+    private       Piece[][]          board;
     private final List<GameObserver> observers = new ArrayList<>();
-    private Position selectedPosition;
-    private final Player DEFENDER = Player.DEFENDER;
-    private final Player ATTACKER = Player.ATTACKER;
+    private       Position           selectedPosition;
+    private final Player             DEFENDER  = Player.DEFENDER;
+    private final Player             ATTACKER  = Player.ATTACKER;
 
     // Inner classes remain the same (Position, Move, Piece, King, Defender, Attacker)
 

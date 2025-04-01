@@ -1,4 +1,4 @@
-package ca.bcit.comp2522.termProject;
+package ca.bcit.comp2522.termProject.myGame;
 
 import javafx.application.Application;
 import javafx.scene.*;
@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.nio.file.*;
 
 public class TablutApp extends Application {
-    private TablutGame game;
+    private TablutGame  game;
     private TablutBoard boardUI;
 
     @Override
