@@ -1,0 +1,23 @@
+.noAccessTile {
+    -fx-background-color: #464746;
+}
+
+.lightTile {
+    -fx-background-color: #c4c8c4;
+}
+
+.darkTile {
+    -fx-background-color: #929592;
+}
+
+.winTile {
+    -fx-background-color: #0dda9c;
+}
+
+.validMove {
+    -fx-background-color: #4CAF50;
+}
+
+.selectedPiece {
+    -fx-background-color: #adfaaf;
+}

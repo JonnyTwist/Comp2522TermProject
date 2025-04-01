@@ -38,12 +38,18 @@ public final class TablutSpinoff extends Application implements Playable
     private static final int LAST_COL;
     private static final int LAST_ROW;
 
-    private static final String VAL_MOVE = "validMove";
-    private static final String SELECTED = "selectedPiece";
+    private static final String VAL_MOVE   = "validMove";
+    private static final String SELECTED   = "selectedPiece";
+    private static final String LIGHT      = "lightTile";
+    private static final String DARK       = "darkTile";
+    private static final String RESTRICTED = "noAccessTile";
+    private static final String WIN_TILE   = "winTile";
 
     private static final int        SINGLE_THREAD = 1;
     private static final Button[][] board;
     private static final Piece[][]  pieces;
+
+    private static boolean nextTileLight = true;
 
     static
     {
@@ -86,7 +92,7 @@ public final class TablutSpinoff extends Application implements Playable
         try
         {
             scene.getStylesheets()
-                    .add(getClass().getResource("/tablutStyles.css")
+                    .add(getClass().getResource("/styles/tablutStyles.css")
                                  .toExternalForm());
         }
         catch(final NullPointerException e)
@@ -136,10 +142,12 @@ public final class TablutSpinoff extends Application implements Playable
                 pieces[row][col] = initializePiece(row, col);  // You should write this method to initialize the pieces
 
                 // Update the button based on the piece at this position
-                updateButtonWithPiece(btn, pieces[row][col]);
+                updateButtonImage(btn, pieces[row][col]);
 
                 btn.setMinSize(BTN_SIZE_PX, BTN_SIZE_PX);
+                btn.setMaxSize(BTN_SIZE_PX, BTN_SIZE_PX);
                 btn.setOnAction(event -> btnClicked(btn, position));
+                giveInitialColor(btn, row, col);
 
                 board[row][col] = btn;
 
@@ -149,6 +157,41 @@ public final class TablutSpinoff extends Application implements Playable
         }
 
         return scene;
+    }
+
+    private static void giveInitialColor(final Button btn,
+                                         final int row,
+                                         final int col)
+    {
+        nextTileLight = !nextTileLight;
+
+        if ((row == FIRST_ROW && (col == FIRST_COL + OFFSET_ONE || col == FIRST_COL + OFFSET_TWO)) ||
+            (row == FIRST_ROW && (col == LAST_COL - OFFSET_ONE || col == LAST_COL - OFFSET_TWO)) ||
+            (row == LAST_ROW && (col == FIRST_COL + OFFSET_ONE || col == FIRST_COL + OFFSET_TWO)) ||
+            (row == LAST_ROW && (col == LAST_COL - OFFSET_ONE || col == LAST_COL - OFFSET_TWO)) ||
+            (col == FIRST_COL && (row == FIRST_ROW + OFFSET_ONE || row == FIRST_ROW + OFFSET_TWO)) ||
+            (col == FIRST_COL && (row == LAST_ROW - OFFSET_ONE || row == LAST_ROW - OFFSET_TWO)) ||
+            (col == LAST_COL && (row == FIRST_ROW + OFFSET_ONE || row == FIRST_ROW + OFFSET_TWO)) ||
+            (col == LAST_COL && (row == LAST_ROW - OFFSET_ONE || row == LAST_ROW - OFFSET_TWO)))
+        {
+            btn.getStyleClass().add(WIN_TILE);
+            return;
+        }
+
+        if (row == CENTER_ROW && col == CENTER_COL)
+        {
+            btn.getStyleClass().add(RESTRICTED);
+            return;
+        }
+
+        if (nextTileLight)
+        {
+            btn.getStyleClass().add(LIGHT);
+        }
+        else
+        {
+            btn.getStyleClass().add(DARK);
+        }
     }
 
     /*
@@ -186,7 +229,9 @@ public final class TablutSpinoff extends Application implements Playable
         }
 
         if (((row >= CENTER_ROW - OFFSET_TWO && row <= CENTER_ROW + OFFSET_TWO && col == CENTER_COL) ||
-                (col >= CENTER_COL - OFFSET_TWO && col <= CENTER_COL + OFFSET_TWO && row == CENTER_ROW))) {
+            (col >= CENTER_COL - OFFSET_TWO && col <= CENTER_COL + OFFSET_TWO && row == CENTER_ROW)) ||
+            (row == CENTER_ROW + OFFSET_ONE && col <= CENTER_COL + OFFSET_ONE && col >= CENTER_COL - OFFSET_ONE) ||
+            (row == CENTER_ROW - OFFSET_ONE && col <= CENTER_COL + OFFSET_ONE && col >= CENTER_COL - OFFSET_ONE)) {
             return new Piece(Player.DEFENDER, false);
         }
 
@@ -194,12 +239,28 @@ public final class TablutSpinoff extends Application implements Playable
     }
 
     // Method to update the button based on the piece
-    private static void updateButtonWithPiece(final Button btn,
+
+    /*
+     * Updates a button's displayed image. Used when a piece moves to this
+     * tile (button) and when setting up the board.
+     * @param btn the button to change the image of.
+     * @param piece the piece to be placed in this position
+     */
+    private static void updateButtonImage(final Button btn,
                                               final Piece piece)
     {
         final ImageView imageView;
         imageView = Piece.getPieceImageView(piece);
         btn.setGraphic(imageView);
+    }
+
+    /*
+     * Clears a buttons image. Used when a piece moves off a tile.
+     * @param btn the button to change the image of.
+     */
+    private static void updateButtonImage(final Button btn)
+    {
+        btn.setGraphic(null);
     }
 
     /*
@@ -253,6 +314,8 @@ public final class TablutSpinoff extends Application implements Playable
      */
     private static void moveLikeKing(final Position pos)
     {
+        //todo update so that kings can move like chess king and
+        // capture pieces
         if (pos.row + OFFSET_ONE <= LAST_ROW &&
                 pieces[pos.row + OFFSET_ONE][pos.col] == null)
         {
@@ -278,6 +341,11 @@ public final class TablutSpinoff extends Application implements Playable
         }
     }
 
+    /*
+     * Calculates the valid movements if a piece were to move
+     * like a knight from chess.
+     * @param pos the current position of the piece.
+     */
     private static void moveLikeKnight(final Position pos)
     {
         //todo fix this jippity
@@ -293,6 +361,7 @@ public final class TablutSpinoff extends Application implements Playable
 
             if (newRow >= FIRST_ROW && newRow <= LAST_ROW &&
                     newCol >= FIRST_COL && newCol <= LAST_COL &&
+                    (newCol != CENTER_COL || newRow != CENTER_ROW) &&
                     (pieces[newRow][newCol] == null || pieces[newRow][newCol].getOwner() != currentMove))
             {
                 board[newRow][newCol].getStyleClass().add("validMove");
@@ -300,26 +369,67 @@ public final class TablutSpinoff extends Application implements Playable
         }
     }
 
-
+    /*
+     * Moves a piece from one tile to another.
+     * @param piece the piece to be moved.
+     * @param newPos the new position of the piece.
+     * @param btn the button that will be updated to show the new
+     * position of the piece.
+     */
     private static void makeTheMove(final Piece piece,
                                     final Position newPos,
                                     final Button btn)
     {
         final Button btnToClear;
+        boolean delayedWin = false;
 
         btnToClear = board[lastClickedPos.row][lastClickedPos.col];
 
         pieces[lastClickedPos.row][lastClickedPos.col] = null;
 
-        updateButtonWithPiece(btnToClear, null);
+        updateButtonImage(btnToClear);
+
+        if (pieces[newPos.row][newPos.col] != null &&
+                pieces[newPos.row][newPos.col].isKing)
+        {
+            delayedWin = true;
+        }
 
         pieces[newPos.row][newPos.col] = piece;
-        updateButtonWithPiece(btn, piece);
+        updateButtonImage(btn, piece);
 
         updatePlayerTurn();
         clearSelectColors();
+
+        if (piece.isKing && btn.getStyleClass().contains(WIN_TILE))
+        {
+            defendersWin();
+        }
+        else if(delayedWin)
+        {
+            attackersWin();
+        }
     }
 
+    /*
+     * todo this
+     */
+    private static void defendersWin()
+    {
+        System.out.println("Defenders win");
+    }
+
+    /*
+     * todo this
+     */
+    private static void attackersWin()
+    {
+        System.out.println("Attackers win");
+    }
+
+    /*
+     * updates which player will make the next move.
+     */
     private static void updatePlayerTurn()
     {
         if (currentMove == Player.DEFENDER)
@@ -443,7 +553,7 @@ public final class TablutSpinoff extends Application implements Playable
         }
 
         /*
-         *
+         * todo comment
          * @param piece
          * @return
          */

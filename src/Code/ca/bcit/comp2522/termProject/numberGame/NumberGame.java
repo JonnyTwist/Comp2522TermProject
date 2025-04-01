@@ -120,7 +120,7 @@ public final class NumberGame
         try
         {
             scene.getStylesheets()
-                    .add(getClass().getResource("/numberGameStyles.css")
+                    .add(getClass().getResource("/styles/numberGameStyles.css")
                                  .toExternalForm());
         }
         catch(final NullPointerException e)
