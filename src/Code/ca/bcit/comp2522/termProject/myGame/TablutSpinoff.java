@@ -1,9 +1,7 @@
 package ca.bcit.comp2522.termProject.myGame;
 
-// AI IS ALLOWED ON MY OWN GAME
-// MUST BE UNIQUE
-
 import ca.bcit.comp2522.termProject.Playable;
+import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -17,7 +15,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
 //todo make game 2 player (tablut) viking chess
-public final class TablutSpinoff implements Playable
+public final class TablutSpinoff extends Application implements Playable
 {
     private enum Player {
         DEFENDER,
@@ -39,6 +37,9 @@ public final class TablutSpinoff implements Playable
     private static final int FIRST_ROW = 0;
     private static final int LAST_COL;
     private static final int LAST_ROW;
+
+    private static final String VAL_MOVE = "validMove";
+    private static final String SELECTED = "selectedPiece";
 
     private static final int        SINGLE_THREAD = 1;
     private static final Button[][] board;
@@ -193,50 +194,161 @@ public final class TablutSpinoff implements Playable
     }
 
     // Method to update the button based on the piece
-    private static void updateButtonWithPiece(Button btn, Piece piece) {
-        btn.setText(""); // Clear text
-        ImageView imageView = Piece.getPieceImageView(piece);
+    private static void updateButtonWithPiece(final Button btn,
+                                              final Piece piece)
+    {
+        final ImageView imageView;
+        imageView = Piece.getPieceImageView(piece);
         btn.setGraphic(imageView);
     }
 
+    /*
+     * todo comment
+     * A button has been clicked.
+     * Time to figure out what it's supposed to do.
+     * @param btn
+     * @param pos
+     */
     private static void btnClicked(final Button btn,
                                    final Position pos)
     {
-        Piece piece = pieces[pos.row][pos.col];
-        if (piece != null) {
+        if (btn.getStyleClass().contains(VAL_MOVE))
+        {
+            final Piece pieceToMove;
+            pieceToMove = pieces[lastClickedPos.row][lastClickedPos.col];
+            makeTheMove(pieceToMove, pos, btn);
+        }
+
+        final Piece piece;
+        piece = pieces[pos.row][pos.col];
+
+        if (piece != null)
+        {
+            clearSelectColors();
             System.out.println("Piece at " + pos.row + "," + pos.col + ": " + piece);
 
             //todo set clicked cell to color
-            //lastClickedPos = pos;
+            lastClickedPos = pos;
+            board[lastClickedPos.row][lastClickedPos.col].getStyleClass().add(SELECTED);
+
             if (currentMove == piece.getOwner() && piece.isKing)
             {
                 moveLikeKing(pos);
             }
-        } else {
-            //todo clear any colored squares (selected and valid moves)
+            else if (currentMove == piece.getOwner() && !piece.isKing)
+            {
+                moveLikeKnight(pos);
+            }
+        }
+        else
+        {
+            clearSelectColors();
             System.out.println("Empty space at " + pos.row + "," + pos.col);
         }
     }
 
+    /*
+     * Highlights the surrounding valid moves for the king.
+     * @param pos the position of the king.
+     */
     private static void moveLikeKing(final Position pos)
     {
-        if (pos.row + OFFSET_ONE < LAST_ROW && pieces[pos.row + OFFSET_ONE][pos.col] == null) {
+        if (pos.row + OFFSET_ONE <= LAST_ROW &&
+                pieces[pos.row + OFFSET_ONE][pos.col] == null)
+        {
             board[pos.row + OFFSET_ONE][pos.col].getStyleClass().add("validMove");
         }
 
-        if (pos.row - OFFSET_ONE >= FIRST_ROW && pieces[pos.row - OFFSET_ONE][pos.col] == null) {
+        if (pos.row - OFFSET_ONE >= FIRST_ROW &&
+                pieces[pos.row - OFFSET_ONE][pos.col] == null)
+        {
             board[pos.row - OFFSET_ONE][pos.col].getStyleClass().add("validMove");
         }
 
-        if (pos.col + OFFSET_ONE < LAST_COL && pieces[pos.row][pos.col + OFFSET_ONE] == null) {
+        if (pos.col + OFFSET_ONE <= LAST_COL &&
+                pieces[pos.row][pos.col + OFFSET_ONE] == null)
+        {
             board[pos.row][pos.col + OFFSET_ONE].getStyleClass().add("validMove");
         }
 
-        if (pos.col - OFFSET_ONE >= FIRST_COL && pieces[pos.row][pos.col - OFFSET_ONE] == null) {
+        if (pos.col - OFFSET_ONE >= FIRST_COL &&
+                pieces[pos.row][pos.col - OFFSET_ONE] == null)
+        {
             board[pos.row][pos.col - OFFSET_ONE].getStyleClass().add("validMove");
         }
     }
 
+    private static void moveLikeKnight(final Position pos)
+    {
+        //todo fix this jippity
+        final int[][] knightMoves = {
+                {2, 1}, {2, -1}, {-2, 1}, {-2, -1},
+                {1, 2}, {1, -2}, {-1, 2}, {-1, -2}
+        };
+
+        for (int[] move : knightMoves)
+        {
+            int newRow = pos.row + move[0];
+            int newCol = pos.col + move[1];
+
+            if (newRow >= FIRST_ROW && newRow <= LAST_ROW &&
+                    newCol >= FIRST_COL && newCol <= LAST_COL &&
+                    (pieces[newRow][newCol] == null || pieces[newRow][newCol].getOwner() != currentMove))
+            {
+                board[newRow][newCol].getStyleClass().add("validMove");
+            }
+        }
+    }
+
+
+    private static void makeTheMove(final Piece piece,
+                                    final Position newPos,
+                                    final Button btn)
+    {
+        final Button btnToClear;
+
+        btnToClear = board[lastClickedPos.row][lastClickedPos.col];
+
+        pieces[lastClickedPos.row][lastClickedPos.col] = null;
+
+        updateButtonWithPiece(btnToClear, null);
+
+        pieces[newPos.row][newPos.col] = piece;
+        updateButtonWithPiece(btn, piece);
+
+        updatePlayerTurn();
+        clearSelectColors();
+    }
+
+    private static void updatePlayerTurn()
+    {
+        if (currentMove == Player.DEFENDER)
+        {
+            currentMove = Player.ATTACKER;
+        }
+        else
+        {
+            currentMove = Player.DEFENDER;
+        }
+    }
+
+    /*
+     * Clears the valid move colors as well as the selected piece color.
+     */
+    private static void clearSelectColors()
+    {
+        for (final Button[] row : board)
+        {
+            for (final Button btn : row)
+            {
+                btn.getStyleClass().removeAll(VAL_MOVE, SELECTED);
+            }
+        }
+    }
+
+    /**
+     * Entry point of my game. Launches the game and tells Main to wait.
+     */
     public void play()
     {
         try
@@ -272,6 +384,9 @@ public final class TablutSpinoff implements Playable
         }
     }
 
+    /*
+     * A static inner class to make pieces for my game.
+     */
     private static class Piece {
 
         private static final int IMAGE_PADDING_PX = 10;
@@ -289,16 +404,29 @@ public final class TablutSpinoff implements Playable
         private final Player owner;
         private final boolean isKing;
 
-        public Piece(Player owner, boolean isKing) {
+        /**
+         * Constructor for a Piece object.
+         * @param owner the owner of the piece.
+         * @param isKing if the piece is the king or not.
+         */
+        private Piece(Player owner, boolean isKing) {
             this.owner = owner;
             this.isKing = isKing;
         }
 
-        public Player getOwner() {
+        /**
+         * Getter for the owner.
+         * @return the owner.
+         */
+        public final Player getOwner() {
             return owner;
         }
 
-        public boolean isKing() {
+        /**
+         * Getter for if the piece is the king.
+         * @return if the piece is the king return true. Else false.
+         */
+        public final boolean isKing() {
             return isKing;
         }
 
@@ -309,11 +437,16 @@ public final class TablutSpinoff implements Playable
         @Override
         public String toString() {
             if (isKing) {
-                return owner == Player.DEFENDER ? "D_K" : "A_K"; // Defender King, Attacker King
+                return owner == Player.DEFENDER ? "D_K" : "A_K"; // Defender King, Attacker King (A_K is not real)
             }
             return owner == Player.DEFENDER ? "D" : "A"; // Defender, Attacker
         }
 
+        /*
+         *
+         * @param piece
+         * @return
+         */
         private static ImageView getPieceImageView(final Piece piece) {
             ImageView imageView;
 
