@@ -1,0 +1,8 @@
+
+Deepseek:
+When first starting my personal game I was curious how far AI could get me to a complete game of tablut
+which I could then use as a starting point to add my own twist to the game. Although I spent over an hour
+trying this I eventually gave up and started making my own game from scratch. I was able to salvage some
+ideas from its attempt such as creating Piece and Position objects.
+
+Switched to ChatGPT:

@@ -17,6 +17,7 @@
 VBox {
     -fx-spacing: 10;
     -fx-alignment: center;
+    center horiz
     -fx-padding: 20;
     -fx-background-color: #f5f5f5;
     -fx-border-color: #ddd;

@@ -21,3 +21,7 @@
 .selectedPiece {
     -fx-background-color: #adfaaf;
 }
+
+VBox {
+    -fx-alignment: center;
+}

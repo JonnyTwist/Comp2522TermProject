@@ -5,10 +5,12 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
+import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 
 import javafx.scene.image.Image;
@@ -22,14 +24,34 @@ public final class TablutSpinoff extends Application implements Playable
         ATTACKER
     }
 
+    private enum Movement {
+        KNIGHT,
+        BISHOP,
+        ROOK,
+        QUEEN
+    }
+
     static Player currentMove = Player.DEFENDER;
 
     private static final int BTN_SIZE_PX           = 75;
-    private static final int DEFAULT_SCENE_SIZE_PX = 675;
+    private static final int DEFAULT_SCENE_WIDTH_PX = 675;
+    private static final int DEFAULT_SCENE_HEIGHT_PX = 750;
     private static final int BOARD_SIZE = 9;
     private static final int OFFSET_ONE = 1;
     private static final int OFFSET_TWO = 2;
     private static final int HALF       = 2;
+
+
+    private static final int KNIGHT_SELECT_BOUND = 3;
+    private static final int ROOK_SELECT_BOUND   = 6;
+    private static final int BISHOP_SELECT_BOUND = 9;
+    private static final int MOVE_SELECT_BOUND   = 10;
+
+    private static final int UP = -1;
+    private static final int DOWN = 1;
+    private static final int RIGHT = 1;
+    private static final int LEFT = -1;
+    private static final int NO_MOVEMENT = 0;
 
     private static final int CENTER_COL;
     private static final int CENTER_ROW;
@@ -44,12 +66,19 @@ public final class TablutSpinoff extends Application implements Playable
     private static final String DARK       = "darkTile";
     private static final String RESTRICTED = "noAccessTile";
     private static final String WIN_TILE   = "winTile";
+    private static final String THIS_MOVE  = "This Move: ";
+    private static final String NEXT_MOVE  = "This Move: ";
 
     private static final int        SINGLE_THREAD = 1;
     private static final Button[][] board;
-    private static final Piece[][]  pieces;
+    private static final Piece[][] pieces;
+    private static final Label     thisMoveLabel;
+    private static final Label     nextMoveLabel;
 
     private static boolean nextTileLight = true;
+    private static Position lastClickedPos;
+    private static Movement thisMove;
+    private static Movement nextMove;
 
     static
     {
@@ -60,11 +89,11 @@ public final class TablutSpinoff extends Application implements Playable
         CENTER_ROW = (BOARD_SIZE - OFFSET_ONE) / HALF;
         LAST_COL = BOARD_SIZE - OFFSET_ONE;
         LAST_ROW = BOARD_SIZE - OFFSET_ONE;
+        thisMoveLabel = new Label();
+        nextMoveLabel = new Label();
     }
 
     private final CountDownLatch latch;
-
-    private static Position lastClickedPos;
 
     /**
      * Constructor for a TablutSpinoff object.
@@ -83,6 +112,10 @@ public final class TablutSpinoff extends Application implements Playable
         final Scene scene;
 
         Platform.setImplicitExit(false);
+
+        currentMove = Player.DEFENDER;
+        thisMove = selectMovement();
+        nextMove = selectMovement();
 
         scene = prepareScene();
 
@@ -112,6 +145,33 @@ public final class TablutSpinoff extends Application implements Playable
         primaryStage.requestFocus();
     }
 
+    private static Movement selectMovement()
+    {
+        final Random rand;
+        final int moveSelect;
+
+
+        rand = new Random();
+        moveSelect = rand.nextInt(MOVE_SELECT_BOUND);
+
+        if (moveSelect < KNIGHT_SELECT_BOUND)
+        {
+            return Movement.KNIGHT;
+        }
+        else if (moveSelect < ROOK_SELECT_BOUND)
+        {
+            return Movement.ROOK;
+        }
+        else if (moveSelect < BISHOP_SELECT_BOUND)
+        {
+            return Movement.BISHOP;
+        }
+        else
+        {
+            return Movement.QUEEN;
+        }
+    }
+
     /*
      * Creates the scene.
      * @return a grid of buttons to be used as the game board.
@@ -123,8 +183,14 @@ public final class TablutSpinoff extends Application implements Playable
 
         vbox = new VBox();
         scene = new Scene(vbox,
-                          DEFAULT_SCENE_SIZE_PX,
-                          DEFAULT_SCENE_SIZE_PX);
+                          DEFAULT_SCENE_WIDTH_PX,
+                          DEFAULT_SCENE_HEIGHT_PX);
+
+        thisMoveLabel.setText(THIS_MOVE + thisMove.toString());
+        nextMoveLabel.setText(NEXT_MOVE + nextMove.toString());
+
+        vbox.getChildren().add(thisMoveLabel);
+        vbox.getChildren().add(nextMoveLabel);
 
         for(int row = 0; row < BOARD_SIZE; row++)
         {
@@ -207,7 +273,8 @@ public final class TablutSpinoff extends Application implements Playable
         //todo remove magic nums
 
         //place the king in the middle
-        if (row == CENTER_ROW && col == CENTER_COL) {
+        if (row == CENTER_ROW && col == CENTER_COL)
+        {
             return new Piece(Player.DEFENDER, true);
         }
 
@@ -286,7 +353,6 @@ public final class TablutSpinoff extends Application implements Playable
         if (piece != null)
         {
             clearSelectColors();
-            System.out.println("Piece at " + pos.row + "," + pos.col + ": " + piece);
 
             //todo set clicked cell to color
             lastClickedPos = pos;
@@ -298,13 +364,25 @@ public final class TablutSpinoff extends Application implements Playable
             }
             else if (currentMove == piece.getOwner() && !piece.isKing)
             {
-                moveLikeKnight(pos);
+                switch (thisMove)
+                {
+                    case KNIGHT ->
+                        moveLikeKnight(pos);
+                    case ROOK ->
+                        moveLikeRook(pos);
+                    case BISHOP ->
+                        moveLikeBishop(pos);
+                    case QUEEN ->
+                        moveLikeQueen(pos);
+                    default -> {
+                        System.out.println("ERROR: reached unreachable code!!");
+                    }
+                }
             }
         }
         else
         {
             clearSelectColors();
-            System.out.println("Empty space at " + pos.row + "," + pos.col);
         }
     }
 
@@ -341,6 +419,8 @@ public final class TablutSpinoff extends Application implements Playable
         }
     }
 
+
+
     /*
      * Calculates the valid movements if a piece were to move
      * like a knight from chess.
@@ -366,6 +446,63 @@ public final class TablutSpinoff extends Application implements Playable
             {
                 board[newRow][newCol].getStyleClass().add("validMove");
             }
+        }
+    }
+
+    /*
+     * Highlights the valid moves for a pawn moving like a rook.
+     * @param pos the position of the pawn.
+     */
+    private static void moveLikeRook(final Position pos)
+    {
+        checkDirection(pos, DOWN, NO_MOVEMENT);
+        checkDirection(pos, UP, NO_MOVEMENT);
+        checkDirection(pos, NO_MOVEMENT, RIGHT);
+        checkDirection(pos, NO_MOVEMENT, LEFT);
+    }
+
+    private static void moveLikeBishop(final Position pos)
+    {
+        checkDirection(pos, DOWN, RIGHT);
+        checkDirection(pos, DOWN, LEFT);
+        checkDirection(pos, UP, RIGHT);
+        checkDirection(pos, UP, LEFT);
+    }
+
+    private static void moveLikeQueen(final Position pos)
+    {
+        moveLikeRook(pos);
+        moveLikeBishop(pos);
+    }
+
+    /*
+     * Helper method to check valid moves in a specific direction.
+     * @param pos The starting position.
+     * @param rowDelta The change in row for each step (e.g., 1 for down, -1 for up).
+     * @param colDelta The change in column for each step (e.g., 1 for right, -1 for left).
+     */
+    private static void checkDirection(final Position pos, int rowDelta, int colDelta)
+    {
+        int row = pos.row + rowDelta;
+        int col = pos.col + colDelta;
+
+        while (row >= FIRST_ROW && row <= LAST_ROW && col >= FIRST_COL && col <= LAST_COL)
+        {
+            final boolean isRestricted;
+            isRestricted = board[row][col].getStyleClass().contains(RESTRICTED);
+            if (pieces[row][col] != null || isRestricted)
+            {
+                if (!isRestricted && pieces[row][col].getOwner() != currentMove )
+                {
+                    board[row][col].getStyleClass().add("validMove");
+                }
+                break;
+            }
+
+            board[row][col].getStyleClass().add("validMove");
+
+            row += rowDelta;
+            col += colDelta;
         }
     }
 
@@ -439,6 +576,10 @@ public final class TablutSpinoff extends Application implements Playable
         else
         {
             currentMove = Player.DEFENDER;
+            thisMove = nextMove;
+            nextMove = selectMovement();
+            thisMoveLabel.setText(THIS_MOVE + thisMove.toString());
+            nextMoveLabel.setText(NEXT_MOVE + nextMove.toString());
         }
     }
 
