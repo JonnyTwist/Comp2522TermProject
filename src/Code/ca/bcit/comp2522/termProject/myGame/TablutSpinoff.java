@@ -19,7 +19,7 @@ import javafx.scene.image.ImageView;
 //todo make game 2 player (tablut) viking chess
 public final class TablutSpinoff extends Application implements Playable
 {
-    private enum Player {
+    enum Player {
         DEFENDER,
         ATTACKER
     }
@@ -33,7 +33,7 @@ public final class TablutSpinoff extends Application implements Playable
 
     static Player currentMove = Player.DEFENDER;
 
-    private static final int BTN_SIZE_PX           = 75;
+    static final int BTN_SIZE_PX           = 75;
     private static final int DEFAULT_SCENE_WIDTH_PX = 675;
     private static final int DEFAULT_SCENE_HEIGHT_PX = 750;
     private static final int BOARD_SIZE = 9;
@@ -275,7 +275,7 @@ public final class TablutSpinoff extends Application implements Playable
         //place the king in the middle
         if (row == CENTER_ROW && col == CENTER_COL)
         {
-            return new Piece(Player.DEFENDER, true);
+            return new King(Player.DEFENDER, true);
         }
 
         //todo make this not this
@@ -292,14 +292,14 @@ public final class TablutSpinoff extends Application implements Playable
                 (col == LAST_COL && (row == 3 || row == CENTER_ROW || row == 5)) ||   // Right T
                 (col == 7 && row == CENTER_ROW)) {
 
-            return new Piece(Player.ATTACKER, false);
+            return new Pawn(Player.ATTACKER, false);
         }
 
         if (((row >= CENTER_ROW - OFFSET_TWO && row <= CENTER_ROW + OFFSET_TWO && col == CENTER_COL) ||
             (col >= CENTER_COL - OFFSET_TWO && col <= CENTER_COL + OFFSET_TWO && row == CENTER_ROW)) ||
             (row == CENTER_ROW + OFFSET_ONE && col <= CENTER_COL + OFFSET_ONE && col >= CENTER_COL - OFFSET_ONE) ||
             (row == CENTER_ROW - OFFSET_ONE && col <= CENTER_COL + OFFSET_ONE && col >= CENTER_COL - OFFSET_ONE)) {
-            return new Piece(Player.DEFENDER, false);
+            return new Pawn(Player.DEFENDER, false);
         }
 
         return null;  // Empty space
@@ -358,11 +358,11 @@ public final class TablutSpinoff extends Application implements Playable
             lastClickedPos = pos;
             board[lastClickedPos.row][lastClickedPos.col].getStyleClass().add(SELECTED);
 
-            if (currentMove == piece.getOwner() && piece.isKing)
+            if (currentMove == piece.getOwner() && piece.isKing())
             {
                 moveLikeKing(pos);
             }
-            else if (currentMove == piece.getOwner() && !piece.isKing)
+            else if (currentMove == piece.getOwner() && !piece.isKing())
             {
                 switch (thisMove)
                 {
@@ -527,7 +527,7 @@ public final class TablutSpinoff extends Application implements Playable
         updateButtonImage(btnToClear);
 
         if (pieces[newPos.row][newPos.col] != null &&
-                pieces[newPos.row][newPos.col].isKing)
+                pieces[newPos.row][newPos.col].isKing())
         {
             delayedWin = true;
         }
@@ -538,7 +538,7 @@ public final class TablutSpinoff extends Application implements Playable
         updatePlayerTurn();
         clearSelectColors();
 
-        if (piece.isKing && btn.getStyleClass().contains(WIN_TILE))
+        if (piece.isKing() && btn.getStyleClass().contains(WIN_TILE))
         {
             defendersWin();
         }
@@ -632,93 +632,6 @@ public final class TablutSpinoff extends Application implements Playable
             //todo validate?
             this.row = row;
             this.col = col;
-        }
-    }
-
-    /*
-     * A static inner class to make pieces for my game.
-     */
-    private static class Piece {
-
-        private static final int IMAGE_PADDING_PX = 10;
-        private static final Image ATTACKER_IMAGE;
-        private static final Image DEFENDER_IMAGE;
-        private static final Image KING_IMAGE;
-
-        static
-        {
-            ATTACKER_IMAGE = new Image("images/attacker.png");
-            DEFENDER_IMAGE = new Image("images/defender.png");
-            KING_IMAGE = new Image("images/king.png");
-        }
-
-        private final Player owner;
-        private final boolean isKing;
-
-        /**
-         * Constructor for a Piece object.
-         * @param owner the owner of the piece.
-         * @param isKing if the piece is the king or not.
-         */
-        private Piece(Player owner, boolean isKing) {
-            this.owner = owner;
-            this.isKing = isKing;
-        }
-
-        /**
-         * Getter for the owner.
-         * @return the owner.
-         */
-        public final Player getOwner() {
-            return owner;
-        }
-
-        /**
-         * Getter for if the piece is the king.
-         * @return if the piece is the king return true. Else false.
-         */
-        public final boolean isKing() {
-            return isKing;
-        }
-
-        /**
-         * A toString method that I use for debugging.
-         * @return the type of the piece.
-         */
-        @Override
-        public String toString() {
-            if (isKing) {
-                return owner == Player.DEFENDER ? "D_K" : "A_K"; // Defender King, Attacker King (A_K is not real)
-            }
-            return owner == Player.DEFENDER ? "D" : "A"; // Defender, Attacker
-        }
-
-        /*
-         * todo comment
-         * @param piece
-         * @return
-         */
-        private static ImageView getPieceImageView(final Piece piece) {
-            ImageView imageView;
-
-            imageView = null;
-
-            if (piece != null) {
-                if (piece.isKing()) {
-                    imageView = new ImageView(KING_IMAGE);
-                } else if (piece.getOwner() == Player.DEFENDER) {
-                    imageView = new ImageView(DEFENDER_IMAGE);
-                } else if (piece.getOwner() == Player.ATTACKER) {
-                    imageView = new ImageView(ATTACKER_IMAGE);
-                }
-
-                if (imageView != null) {
-                    imageView.setFitWidth(BTN_SIZE_PX - IMAGE_PADDING_PX);  // Slightly smaller than button
-                    imageView.setFitHeight(BTN_SIZE_PX - IMAGE_PADDING_PX);
-                }
-            }
-
-            return imageView;
         }
     }
 }
