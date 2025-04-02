@@ -13,17 +13,11 @@ import javafx.stage.Stage;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
-//todo make game 2 player (tablut) viking chess
+
 public final class TablutSpinoff extends Application implements Playable
 {
-    enum Player {
-        DEFENDER,
-        ATTACKER
-    }
-
     private enum Movement {
         KNIGHT,
         BISHOP,
@@ -67,7 +61,7 @@ public final class TablutSpinoff extends Application implements Playable
     private static final String RESTRICTED = "noAccessTile";
     private static final String WIN_TILE   = "winTile";
     private static final String THIS_MOVE  = "This Move: ";
-    private static final String NEXT_MOVE  = "This Move: ";
+    private static final String NEXT_MOVE  = "Next Move: ";
 
     private static final int        SINGLE_THREAD = 1;
     private static final Button[][] board;
@@ -225,12 +219,20 @@ public final class TablutSpinoff extends Application implements Playable
         return scene;
     }
 
+    /*
+     * Gives the tiles on the board classes which can be used
+     * to tell if the tile is special as well as color it.
+     * @param btn the btn to be colored.
+     * @param row the row index.
+     * @param col the column index.
+     */
     private static void giveInitialColor(final Button btn,
                                          final int row,
                                          final int col)
     {
         nextTileLight = !nextTileLight;
 
+        //places the light green tiles on the boarder of the board
         if ((row == FIRST_ROW && (col == FIRST_COL + OFFSET_ONE || col == FIRST_COL + OFFSET_TWO)) ||
             (row == FIRST_ROW && (col == LAST_COL - OFFSET_ONE || col == LAST_COL - OFFSET_TWO)) ||
             (row == LAST_ROW && (col == FIRST_COL + OFFSET_ONE || col == FIRST_COL + OFFSET_TWO)) ||
@@ -244,12 +246,14 @@ public final class TablutSpinoff extends Application implements Playable
             return;
         }
 
+        //places the middle tile which no piece can step on
         if (row == CENTER_ROW && col == CENTER_COL)
         {
             btn.getStyleClass().add(RESTRICTED);
             return;
         }
 
+        //creates an alternating checked pattern
         if (nextTileLight)
         {
             btn.getStyleClass().add(LIGHT);
@@ -305,8 +309,6 @@ public final class TablutSpinoff extends Application implements Playable
         return null;  // Empty space
     }
 
-    // Method to update the button based on the piece
-
     /*
      * Updates a button's displayed image. Used when a piece moves to this
      * tile (button) and when setting up the board.
@@ -350,11 +352,10 @@ public final class TablutSpinoff extends Application implements Playable
         final Piece piece;
         piece = pieces[pos.row][pos.col];
 
+        clearSelectColors();
+
         if (piece != null)
         {
-            clearSelectColors();
-
-            //todo set clicked cell to color
             lastClickedPos = pos;
             board[lastClickedPos.row][lastClickedPos.col].getStyleClass().add(SELECTED);
 
@@ -362,7 +363,7 @@ public final class TablutSpinoff extends Application implements Playable
             {
                 moveLikeKing(pos);
             }
-            else if (currentMove == piece.getOwner() && !piece.isKing())
+            else if (currentMove == piece.getOwner())
             {
                 switch (thisMove)
                 {
@@ -374,15 +375,10 @@ public final class TablutSpinoff extends Application implements Playable
                         moveLikeBishop(pos);
                     case QUEEN ->
                         moveLikeQueen(pos);
-                    default -> {
+                    default ->
                         System.out.println("ERROR: reached unreachable code!!");
-                    }
                 }
             }
-        }
-        else
-        {
-            clearSelectColors();
         }
     }
 

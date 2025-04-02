@@ -17,7 +17,7 @@ abstract class Piece
         KING_IMAGE = new Image("images/king.png");
     }
 
-    private final TablutSpinoff.Player owner;
+    private final Player owner;
     private final boolean              isKing;
 
     /**
@@ -25,7 +25,7 @@ abstract class Piece
      * @param owner the owner of the piece.
      * @param isKing if the piece is the king or not.
      */
-    Piece(final TablutSpinoff.Player owner,
+    Piece(final Player owner,
           final boolean isKing) {
         validateOwner(owner);
 
@@ -33,7 +33,7 @@ abstract class Piece
         this.isKing = isKing;
     }
 
-    private static void validateOwner(final TablutSpinoff.Player owner)
+    private static void validateOwner(final Player owner)
     {
         if (owner == null)
         {
@@ -45,7 +45,7 @@ abstract class Piece
      * Getter for the owner.
      * @return the owner.
      */
-    public final TablutSpinoff.Player getOwner() {
+    public final Player getOwner() {
         return owner;
     }
 
@@ -64,9 +64,9 @@ abstract class Piece
     @Override
     public String toString() {
         if (isKing) {
-            return owner == TablutSpinoff.Player.DEFENDER ? "D_K" : "A_K"; // Defender King, Attacker King (A_K is not real)
+            return owner == Player.DEFENDER ? "D_K" : "A_K"; // Defender King, Attacker King (A_K is not real)
         }
-        return owner == TablutSpinoff.Player.DEFENDER ? "D" : "A"; // Defender, Attacker
+        return owner == Player.DEFENDER ? "D" : "A"; // Defender, Attacker
     }
 
     /*
@@ -82,9 +82,9 @@ abstract class Piece
         if (piece != null) {
             if (piece.isKing()) {
                 imageView = new ImageView(KING_IMAGE);
-            } else if (piece.getOwner() == TablutSpinoff.Player.DEFENDER) {
+            } else if (piece.getOwner() == Player.DEFENDER) {
                 imageView = new ImageView(DEFENDER_IMAGE);
-            } else if (piece.getOwner() == TablutSpinoff.Player.ATTACKER) {
+            } else if (piece.getOwner() == Player.ATTACKER) {
                 imageView = new ImageView(ATTACKER_IMAGE);
             }
 
