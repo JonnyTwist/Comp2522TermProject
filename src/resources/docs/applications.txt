@@ -1,7 +1,8 @@
 Lesson 1: Static initializer block in TablutSpinoff
           Overloaded method in TablutSpinoff (updateButtonImage)
 
-Lesson 2:
+Lesson 2: IllegalArgumentExceptions in validator methods (ex: validateOwner in Piece)
+          Inheritance and Polymorphism between Piece, King and Pawn
 
 Lesson 3:
 

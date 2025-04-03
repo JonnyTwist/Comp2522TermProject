@@ -3,6 +3,11 @@ package ca.bcit.comp2522.termProject.myGame;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
+/**
+ * An abstract class to define what all pieces have.
+ * @author Jonny Twist
+ * @version 1.0
+ */
 abstract class Piece
 {
     private static final int   IMAGE_PADDING_PX = 10;
@@ -26,13 +31,18 @@ abstract class Piece
      * @param isKing if the piece is the king or not.
      */
     Piece(final Player owner,
-          final boolean isKing) {
+          final boolean isKing)
+    {
         validateOwner(owner);
 
         this.owner = owner;
         this.isKing = isKing;
     }
 
+    /*
+     * Validates that all pieces have an owner.
+     * @param owner the owner to validate.
+     */
     private static void validateOwner(final Player owner)
     {
         if (owner == null)
@@ -45,7 +55,8 @@ abstract class Piece
      * Getter for the owner.
      * @return the owner.
      */
-    public final Player getOwner() {
+    public final Player getOwner()
+    {
         return owner;
     }
 
@@ -53,7 +64,8 @@ abstract class Piece
      * Getter for if the piece is the king.
      * @return if the piece is the king return true. Else false.
      */
-    public final boolean isKing() {
+    public final boolean isKing()
+    {
         return isKing;
     }
 
@@ -62,8 +74,10 @@ abstract class Piece
      * @return the type of the piece.
      */
     @Override
-    public String toString() {
-        if (isKing) {
+    public String toString()
+    {
+        if (isKing)
+        {
             return owner == Player.DEFENDER ? "D_K" : "A_K"; // Defender King, Attacker King (A_K is not real)
         }
         return owner == Player.DEFENDER ? "D" : "A"; // Defender, Attacker
@@ -74,7 +88,9 @@ abstract class Piece
      * @param piece
      * @return
      */
-    static ImageView getPieceImageView(final Piece piece) {
+    //todo make non static maybe make hand in image path
+    static ImageView getPieceImageView(final Piece piece)
+    {
         ImageView imageView;
 
         imageView = null;

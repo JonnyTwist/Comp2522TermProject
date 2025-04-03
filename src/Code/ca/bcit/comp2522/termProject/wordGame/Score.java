@@ -530,8 +530,7 @@ public final class Score {
                 .append("\n")
                 .append("Score: ")
                 .append(finalScore)
-                .append(" points")
-                .append(System.lineSeparator());
+                .append(" points\n");
 
         return sb.toString();
     }
