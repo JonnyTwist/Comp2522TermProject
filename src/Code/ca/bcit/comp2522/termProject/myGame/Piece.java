@@ -23,7 +23,7 @@ abstract class Piece
     }
 
     private final Player owner;
-    private final boolean              isKing;
+    private final boolean isKing;
 
     /**
      * Constructor for a Piece object.
@@ -37,6 +37,16 @@ abstract class Piece
 
         this.owner = owner;
         this.isKing = isKing;
+    }
+
+    /**
+     * Constructor for a piece that does not pass if it is a king.
+     * Assumes the piece is not a king in that case.
+     * @param owner the owner of the piece.
+     */
+    Piece(final Player owner)
+    {
+        this(owner, false);
     }
 
     /*
@@ -70,7 +80,7 @@ abstract class Piece
     }
 
     /**
-     * A toString method that I use for debugging.
+     * A toString method that I use for debugging only.
      * @return the type of the piece.
      */
     @Override
@@ -83,7 +93,7 @@ abstract class Piece
         return owner == Player.DEFENDER ? "D" : "A"; // Defender, Attacker
     }
 
-    /*
+    /**
      * todo comment
      * @param piece
      * @return
@@ -105,7 +115,8 @@ abstract class Piece
             }
 
             if (imageView != null) {
-                imageView.setFitWidth(TablutSpinoff.BTN_SIZE_PX - IMAGE_PADDING_PX);  // Slightly smaller than button
+                // Make the image slightly smaller than the button
+                imageView.setFitWidth(TablutSpinoff.BTN_SIZE_PX - IMAGE_PADDING_PX);
                 imageView.setFitHeight(TablutSpinoff.BTN_SIZE_PX - IMAGE_PADDING_PX);
             }
         }

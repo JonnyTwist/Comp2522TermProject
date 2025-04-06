@@ -2,9 +2,21 @@ package ca.bcit.comp2522.termProject.myGame;
 
 final class King extends Piece
 {
-    King(final Player owner,
-         final boolean isKing)
+    //todo check if singletonable
+
+    private static King instance;
+
+    private King()
     {
-        super(owner, isKing);
+        super(Player.DEFENDER, true);
+    }
+
+    public static King getInstance()
+    {
+        if (instance == null)
+        {
+            instance = new King();
+        }
+        return instance;
     }
 }

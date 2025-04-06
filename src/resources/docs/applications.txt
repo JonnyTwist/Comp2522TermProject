@@ -4,8 +4,23 @@ Lesson 1: Static initializer block in TablutSpinoff
 Lesson 2: IllegalArgumentExceptions in validator methods (ex: validateOwner in Piece)
           Inheritance and Polymorphism between Piece, King and Pawn
 
-Lesson 3:
+Lesson 3: Abstract Piece Class + Final King/Pawn Class + Final TablutSpinoff Class
 
-Lesson 4:
+Lesson 4: Playable Interface
 
-Lesson 5:
+Lesson 5: Array in TablutSpinoff class
+          For each loop (final int[] move : knightMoves) and similar in TablutSpinoff class
+
+Lesson 6: Static nested class Position in TablutSpinoff
+
+Lesson 7: Lambda expressions in TablutSpinoff
+
+Lesson 8: Streaming in TablutSpinoff
+
+Lesson 9: Gui in TablutSpinoff
+
+Lesson 10: //todo make unit tests
+
+Lesson 11: Singleton in King class
+
+singleton in king?

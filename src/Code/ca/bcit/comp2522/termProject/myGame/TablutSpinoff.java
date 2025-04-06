@@ -27,30 +27,27 @@ public final class TablutSpinoff extends Application implements Playable
         QUEEN
     }
 
-    //todo create arrayList of postitions to stream then to set where the win positions are
-
-    //todo make second row, second col, stuff like that
-    // dont trust params always validate data
+    //todo dont trust params always validate data
 
     static Player currentMove = Player.DEFENDER;
 
-    static final int BTN_SIZE_PX           = 75;
-    private static final int DEFAULT_SCENE_WIDTH_PX = 675;
+    static final         int BTN_SIZE_PX             = 75;
+    private static final int DEFAULT_SCENE_WIDTH_PX  = 675;
     private static final int DEFAULT_SCENE_HEIGHT_PX = 750;
-    private static final int BOARD_SIZE = 9;
-    private static final int OFFSET_ONE = 1;
-    private static final int OFFSET_TWO = 2;
-    private static final int HALF       = 2;
+    private static final int BOARD_SIZE              = 9;
+    private static final int OFFSET_ONE              = 1;
+    private static final int OFFSET_TWO              = 2;
+    private static final int HALF                    = 2;
 
     private static final int KNIGHT_SELECT_BOUND = 3;
     private static final int ROOK_SELECT_BOUND   = 6;
     private static final int BISHOP_SELECT_BOUND = 9;
     private static final int MOVE_SELECT_BOUND   = 10;
 
-    private static final int UP = -1;
-    private static final int DOWN = 1;
-    private static final int RIGHT = 1;
-    private static final int LEFT = -1;
+    private static final int UP          = -1;
+    private static final int DOWN        = 1;
+    private static final int RIGHT       = 1;
+    private static final int LEFT        = -1;
     private static final int NO_MOVEMENT = 0;
 
     private static final int LEFT_CENTER_COL;
@@ -59,48 +56,51 @@ public final class TablutSpinoff extends Application implements Playable
     private static final int TOP_CENTER_ROW;
     private static final int CENTER_ROW;
     private static final int BOTTOM_CENTER_ROW;
-    private static final int FIRST_COL = 0;
-    private static final int FIRST_ROW = 0;
+    private static final int FIRST_COL  = 0;
+    private static final int FIRST_ROW  = 0;
     private static final int SECOND_COL = 1;
-    private static final int SECOND_ROW = 1;
     private static final int LAST_COL;
     private static final int LAST_ROW;
     private static final int SECOND_LAST_COL;
-    private static final int SECOND_LAST_ROW;
 
 
-    private static final String VAL_MOVE   = "validMove";
-    private static final String SELECTED   = "selectedPiece";
-    private static final String LIGHT      = "lightTile";
-    private static final String DARK       = "darkTile";
-    private static final String RESTRICTED = "noAccessTile";
-    private static final String WIN_TILE   = "winTile";
-    private static final String THIS_MOVE  = "This Move: ";
-    private static final String NEXT_MOVE  = "Next Move: ";
+    private static final String VAL_MOVE    = "validMove";
+    private static final String SELECTED    = "selectedPiece";
+    private static final String LIGHT       = "lightTile";
+    private static final String DARK        = "darkTile";
+    private static final String RESTRICTED  = "noAccessTile";
+    private static final String WIN_TILE    = "winTile";
+    private static final String THIS_MOVE   = "This Move: ";
+    private static final String NEXT_MOVE   = "Next Move: ";
+    private static final String ATK_WIN_STR = "Attacker Wins: ";
+    private static final String DFD_WIN_STR = "Defender Wins: ";
 
-    private static final int        SINGLE_THREAD = 1;
-    private static final Button[][] board;
-    private static final Piece[][] pieces;
-    private static final Label     thisMoveLabel;
-    private static final Label     nextMoveLabel;
-    private static final List<Position> winPositions;
+    private static final int            SINGLE_THREAD = 1;
+    private static final Button[][]     BOARD;
+    private static final Piece[][]      PIECES;
+    private static final Label          THIS_MOVE_LABEL;
+    private static final Label          NEXT_MOVE_LABEL;
+    private static final List<Position> WIN_POSITIONS;
 
-    private static final int FIRST_ELEMENT = 0;
+    private static final int FIRST_ELEMENT  = 0;
     private static final int SECOND_ELEMENT = 1;
 
-    private static final int KNIGHT_MOVE_LONG = 2;
+    private static final int KNIGHT_MOVE_LONG  = 2;
     private static final int KNIGHT_MOVE_SHORT = 1;
 
-    private static boolean nextTileLight = true;
+    private static boolean  nextTileLight = true;
     private static Position lastClickedPos;
     private static Movement thisMove;
     private static Movement nextMove;
+    private static int      attackerWins;
+    private static int      defenderWins;
 
     static
     {
-        board      = new Button[BOARD_SIZE][BOARD_SIZE];
-        pieces     = new Piece[BOARD_SIZE][BOARD_SIZE];
-        //todo change these?
+        BOARD  = new Button[BOARD_SIZE][BOARD_SIZE];
+        PIECES = new Piece[BOARD_SIZE][BOARD_SIZE];
+
+        //decided to make the center col/row calculate dynamically just incase
         CENTER_COL = (BOARD_SIZE - OFFSET_ONE) / HALF;
         CENTER_ROW = (BOARD_SIZE - OFFSET_ONE) / HALF;
 
@@ -113,11 +113,10 @@ public final class TablutSpinoff extends Application implements Playable
         LAST_ROW = BOARD_SIZE - OFFSET_ONE;
 
         SECOND_LAST_COL = BOARD_SIZE - OFFSET_TWO;
-        SECOND_LAST_ROW = BOARD_SIZE - OFFSET_TWO;
 
-        thisMoveLabel = new Label();
-        nextMoveLabel = new Label();
-        winPositions = chooseWinPos();
+        THIS_MOVE_LABEL = new Label();
+        NEXT_MOVE_LABEL = new Label();
+        WIN_POSITIONS   = chooseWinPos();
     }
 
     private final CountDownLatch latch;
@@ -209,6 +208,10 @@ public final class TablutSpinoff extends Application implements Playable
         return winPos;
     }
 
+    /*
+     * Selects what kind of movement will be coming up.
+     * @return the randomly selected movement.
+     */
     private static Movement selectMovement()
     {
         final Random rand;
@@ -250,11 +253,11 @@ public final class TablutSpinoff extends Application implements Playable
                           DEFAULT_SCENE_WIDTH_PX,
                           DEFAULT_SCENE_HEIGHT_PX);
 
-        thisMoveLabel.setText(THIS_MOVE + thisMove.toString());
-        nextMoveLabel.setText(NEXT_MOVE + nextMove.toString());
+        THIS_MOVE_LABEL.setText(THIS_MOVE + thisMove.toString());
+        NEXT_MOVE_LABEL.setText(NEXT_MOVE + nextMove.toString());
 
-        vbox.getChildren().add(thisMoveLabel);
-        vbox.getChildren().add(nextMoveLabel);
+        vbox.getChildren().add(THIS_MOVE_LABEL);
+        vbox.getChildren().add(NEXT_MOVE_LABEL);
 
         for(int row = 0; row < BOARD_SIZE; row++)
         {
@@ -268,18 +271,18 @@ public final class TablutSpinoff extends Application implements Playable
                 position = new Position(row, col);
                 btn = new Button();
 
-                // Initialize the piece (e.g., set to null for an empty space, or create a new piece for defenders/attackers)
-                pieces[row][col] = initializePiece(row, col);  // You should write this method to initialize the pieces
+                // Initialize the piece (null if there is no piece)
+                PIECES[row][col] = initializePiece(row, col);
 
                 // Update the button based on the piece at this position
-                updateButtonImage(btn, pieces[row][col]);
+                updateButtonImage(btn, PIECES[row][col]);
 
                 btn.setMinSize(BTN_SIZE_PX, BTN_SIZE_PX);
                 btn.setMaxSize(BTN_SIZE_PX, BTN_SIZE_PX);
                 btn.setOnAction(event -> btnClicked(btn, position));
                 giveInitialColor(btn, row, col);
 
-                board[row][col] = btn;
+                BOARD[row][col] = btn;
 
                 hbox.getChildren().add(btn);
             }
@@ -302,6 +305,10 @@ public final class TablutSpinoff extends Application implements Playable
                                          final int row,
                                          final int col)
     {
+        validateNonNull(btn);
+        Position.validateRow(row);
+        Position.validateCol(col);
+
         nextTileLight = !nextTileLight;
 
         //places the middle tile which no piece can step on
@@ -327,10 +334,10 @@ public final class TablutSpinoff extends Application implements Playable
      */
     private static void addWinPositions()
     {
-        winPositions.stream()
+        WIN_POSITIONS.stream()
                 .filter(p->p.row >= FIRST_ROW && p.row <= LAST_ROW)
                 .filter(p->p.col >= FIRST_COL && p.col <= LAST_COL)
-                .forEach(p->board[p.row][p.col].getStyleClass().add(WIN_TILE));
+                .forEach(p-> BOARD[p.row][p.col].getStyleClass().add(WIN_TILE));
     }
 
     /*
@@ -343,28 +350,30 @@ public final class TablutSpinoff extends Application implements Playable
     private static Piece initializePiece(final int row,
                                          final int col)
     {
+        Position.validateRow(row);
+        Position.validateCol(col);
+
         //place the king in the middle
         if (row == CENTER_ROW && col == CENTER_COL)
         {
-            return new King(Player.DEFENDER, true);
+            return King.getInstance();
         }
 
-        //place attackers in T-shapes at the ends of each cross
+        //place attackers in T-shapes on the right and left sides
+        // and lines on the top and bottom
         //todo make this more readable
-        if ((row == FIRST_ROW && (col == LEFT_CENTER_COL || col == CENTER_COL || col == RIGHT_CENTER_COL)) ||   // Top T
-                (row == SECOND_ROW && col == CENTER_COL) ||
+        if ((row == FIRST_ROW && (col >= LEFT_CENTER_COL && col <= RIGHT_CENTER_COL)) ||   // Top line
 
-                (row == LAST_ROW && (col == LEFT_CENTER_COL || col == CENTER_COL || col == RIGHT_CENTER_COL)) ||   // Bottom T
-                (row == SECOND_LAST_ROW && col == CENTER_COL) ||
+            (row == LAST_ROW && (col >= LEFT_CENTER_COL && col <= RIGHT_CENTER_COL)) ||   // Bottom line
 
-                (col == FIRST_COL && (row == TOP_CENTER_ROW || row == CENTER_ROW || row == BOTTOM_CENTER_ROW)) ||   // Left T
-                (col == SECOND_COL && row == CENTER_ROW) ||
+            (col == FIRST_COL && (row >= TOP_CENTER_ROW && row <= BOTTOM_CENTER_ROW)) ||   // Left T
+            (col == SECOND_COL && row == CENTER_ROW) ||
 
-                (col == LAST_COL && (row == TOP_CENTER_ROW || row == CENTER_ROW || row == BOTTOM_CENTER_ROW)) ||   // Right T
-                (col == SECOND_LAST_COL && row == CENTER_ROW))
+            (col == LAST_COL && (row >= TOP_CENTER_ROW && row <= BOTTOM_CENTER_ROW)) ||   // Right T
+            (col == SECOND_LAST_COL && row == CENTER_ROW))
         {
 
-            return new Pawn(Player.ATTACKER, false);
+            return new Pawn(Player.ATTACKER);
         }
 
         //place a cross of defenders and 4 extra diagonal of king
@@ -373,7 +382,7 @@ public final class TablutSpinoff extends Application implements Playable
             (row == BOTTOM_CENTER_ROW && col >= LEFT_CENTER_COL && col <= RIGHT_CENTER_COL) ||
             (row == CENTER_ROW - OFFSET_ONE  && col >= LEFT_CENTER_COL && col <= RIGHT_CENTER_COL))
         {
-            return new Pawn(Player.DEFENDER, false);
+            return new Pawn(Player.DEFENDER);
         }
 
         return null;  // Empty space
@@ -388,6 +397,9 @@ public final class TablutSpinoff extends Application implements Playable
     private static void updateButtonImage(final Button btn,
                                           final Piece piece)
     {
+        validateNonNull(btn);
+        validateNonNull(piece);
+
         final ImageView imageView;
         imageView = Piece.getPieceImageView(piece);
         btn.setGraphic(imageView);
@@ -399,6 +411,8 @@ public final class TablutSpinoff extends Application implements Playable
      */
     private static void updateButtonImage(final Button btn)
     {
+        validateNonNull(btn);
+
         btn.setGraphic(null);
     }
 
@@ -412,22 +426,25 @@ public final class TablutSpinoff extends Application implements Playable
     private static void btnClicked(final Button btn,
                                    final Position pos)
     {
+        validateNonNull(btn);
+        validatePosition(pos);
+
         if (btn.getStyleClass().contains(VAL_MOVE))
         {
             final Piece pieceToMove;
-            pieceToMove = pieces[lastClickedPos.row][lastClickedPos.col];
+            pieceToMove = PIECES[lastClickedPos.row][lastClickedPos.col];
             makeTheMove(pieceToMove, pos, btn);
         }
 
         final Piece piece;
-        piece = pieces[pos.row][pos.col];
+        piece = PIECES[pos.row][pos.col];
 
         clearSelectColors();
 
         if (piece != null)
         {
             lastClickedPos = pos;
-            board[lastClickedPos.row][lastClickedPos.col].getStyleClass().add(SELECTED);
+            BOARD[lastClickedPos.row][lastClickedPos.col].getStyleClass().add(SELECTED);
 
             if (currentMove == piece.getOwner() && piece.isKing())
             {
@@ -458,6 +475,8 @@ public final class TablutSpinoff extends Application implements Playable
      */
     private static void moveLikeKing(final Position pos)
     {
+        validatePosition(pos);
+
         //all 8 possible movement directions for the king
         final int[][] directions;
         directions = new int[][] {
@@ -471,30 +490,61 @@ public final class TablutSpinoff extends Application implements Playable
                 {UP, LEFT}
         };
 
-        for (int[] direction : directions) {
-            int newRow = pos.row + direction[FIRST_ELEMENT];
-            int newCol = pos.col + direction[SECOND_ELEMENT];
+        for (final int[] direction : directions) {
+            final int newRow;
+            final int newCol;
+
+            newRow = pos.row + direction[FIRST_ELEMENT];
+            newCol = pos.col + direction[SECOND_ELEMENT];
 
             if (newRow >= FIRST_ROW && newRow <= LAST_ROW && newCol >= FIRST_COL && newCol <= LAST_COL)
             {
-                if ((pieces[newRow][newCol] == null ||
-                     pieces[newRow][newCol].getOwner() != currentMove) &&
-                    !board[newRow][newCol].getStyleClass().contains(RESTRICTED))
+                if ((PIECES[newRow][newCol] == null ||
+                     PIECES[newRow][newCol].getOwner() != currentMove) &&
+                    !BOARD[newRow][newCol].getStyleClass().contains(RESTRICTED))
                 {
-                    board[newRow][newCol].getStyleClass().add("validMove");
+                    BOARD[newRow][newCol].getStyleClass().add("validMove");
                 }
             }
         }
     }
 
     /*
-     * Calculates the valid movements if a piece were to move
-     * like a knight from chess.
+     * Shows the valid movements for a Knight.
      * @param pos the current position of the piece.
      */
     private static void moveLikeKnight(final Position pos)
     {
-        final int[][] knightMoves = {
+        validatePosition(pos);
+
+        final int[][] knightMoves = getKnightMoves();
+
+        for (final int[] move : knightMoves)
+        {
+            final int newRow;
+            final int newCol;
+
+            newRow = pos.row + move[FIRST_ELEMENT];
+            newCol = pos.col + move[SECOND_ELEMENT];
+
+            if (newRow >= FIRST_ROW && newRow <= LAST_ROW &&
+                    newCol >= FIRST_COL && newCol <= LAST_COL &&
+                    (newCol != CENTER_COL || newRow != CENTER_ROW) &&
+                    (PIECES[newRow][newCol] == null || PIECES[newRow][newCol].getOwner() != currentMove))
+            {
+                BOARD[newRow][newCol].getStyleClass().add("validMove");
+            }
+        }
+    }
+
+    /*
+     * Creates an array of the valid moves a knight can make.
+     * @return the valid knight moves.
+     */
+    private static int[][] getKnightMoves()
+    {
+        final int[][] knightMoves;
+        knightMoves = new int[][] {
                 {KNIGHT_MOVE_LONG, KNIGHT_MOVE_SHORT},
                 {KNIGHT_MOVE_LONG, -KNIGHT_MOVE_SHORT},
                 {-KNIGHT_MOVE_LONG, KNIGHT_MOVE_SHORT},
@@ -504,20 +554,7 @@ public final class TablutSpinoff extends Application implements Playable
                 {-KNIGHT_MOVE_SHORT, KNIGHT_MOVE_LONG},
                 {-KNIGHT_MOVE_SHORT, -KNIGHT_MOVE_LONG}
         };
-
-        for (int[] move : knightMoves)
-        {
-            int newRow = pos.row + move[FIRST_ELEMENT];
-            int newCol = pos.col + move[SECOND_ELEMENT];
-
-            if (newRow >= FIRST_ROW && newRow <= LAST_ROW &&
-                    newCol >= FIRST_COL && newCol <= LAST_COL &&
-                    (newCol != CENTER_COL || newRow != CENTER_ROW) &&
-                    (pieces[newRow][newCol] == null || pieces[newRow][newCol].getOwner() != currentMove))
-            {
-                board[newRow][newCol].getStyleClass().add("validMove");
-            }
-        }
+        return knightMoves;
     }
 
     /*
@@ -526,6 +563,8 @@ public final class TablutSpinoff extends Application implements Playable
      */
     private static void moveLikeRook(final Position pos)
     {
+        validatePosition(pos);
+
         checkDirection(pos, DOWN, NO_MOVEMENT);
         checkDirection(pos, UP, NO_MOVEMENT);
         checkDirection(pos, NO_MOVEMENT, RIGHT);
@@ -534,10 +573,12 @@ public final class TablutSpinoff extends Application implements Playable
 
     /*
      * Highlights the valid moves for a pawn moving like a bishop.
-     * @param pos the postion of the pawn.
+     * @param pos the position of the pawn.
      */
     private static void moveLikeBishop(final Position pos)
     {
+        validatePosition(pos);
+
         checkDirection(pos, DOWN, RIGHT);
         checkDirection(pos, DOWN, LEFT);
         checkDirection(pos, UP, RIGHT);
@@ -550,6 +591,8 @@ public final class TablutSpinoff extends Application implements Playable
      */
     private static void moveLikeQueen(final Position pos)
     {
+        validatePosition(pos);
+
         moveLikeRook(pos);
         moveLikeBishop(pos);
     }
@@ -564,23 +607,28 @@ public final class TablutSpinoff extends Application implements Playable
                                        final int rowDelta,
                                        final int colDelta)
     {
-        int row = pos.row + rowDelta;
-        int col = pos.col + colDelta;
+        validatePosition(pos);
+
+        int row;
+        int col;
+
+        row = pos.row + rowDelta;
+        col = pos.col + colDelta;
 
         while (row >= FIRST_ROW && row <= LAST_ROW && col >= FIRST_COL && col <= LAST_COL)
         {
             final boolean isRestricted;
-            isRestricted = board[row][col].getStyleClass().contains(RESTRICTED);
-            if (pieces[row][col] != null || isRestricted)
+            isRestricted = BOARD[row][col].getStyleClass().contains(RESTRICTED);
+            if (PIECES[row][col] != null || isRestricted)
             {
-                if (!isRestricted && pieces[row][col].getOwner() != currentMove)
+                if (!isRestricted && PIECES[row][col].getOwner() != currentMove)
                 {
-                    board[row][col].getStyleClass().add("validMove");
+                    BOARD[row][col].getStyleClass().add("validMove");
                 }
                 break;
             }
 
-            board[row][col].getStyleClass().add("validMove");
+            BOARD[row][col].getStyleClass().add("validMove");
 
             row += rowDelta;
             col += colDelta;
@@ -598,29 +646,34 @@ public final class TablutSpinoff extends Application implements Playable
                                     final Position newPos,
                                     final Button btn)
     {
+        validateNonNull(piece);
+        validateNonNull(btn);
+        validatePosition(newPos);
+
         final Button btnToClear;
         boolean delayedWin;
 
-        btnToClear = board[lastClickedPos.row][lastClickedPos.col];
+        btnToClear = BOARD[lastClickedPos.row][lastClickedPos.col];
         delayedWin = false;
 
-        pieces[lastClickedPos.row][lastClickedPos.col] = null;
+        PIECES[lastClickedPos.row][lastClickedPos.col] = null;
 
         updateButtonImage(btnToClear);
 
-        if (pieces[newPos.row][newPos.col] != null &&
-                pieces[newPos.row][newPos.col].isKing())
+        if (PIECES[newPos.row][newPos.col] != null &&
+                PIECES[newPos.row][newPos.col].isKing())
         {
             delayedWin = true;
         }
 
-        pieces[newPos.row][newPos.col] = piece;
+        PIECES[newPos.row][newPos.col] = piece;
         updateButtonImage(btn, piece);
 
         updatePlayerTurn();
         clearSelectColors();
 
-        if (piece.isKing() && btn.getStyleClass().contains(WIN_TILE))
+        if (piece.isKing() && btn.getStyleClass().contains(WIN_TILE) ||
+            !attackerExists())
         {
             defendersWin();
         }
@@ -630,11 +683,28 @@ public final class TablutSpinoff extends Application implements Playable
         }
     }
 
+    private static boolean attackerExists()
+    {
+        for (final Piece[] row : PIECES)
+        {
+            for (final Piece piece : row)
+            {
+                if (piece != null && piece.getOwner() == Player.ATTACKER)
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     /*
      * todo this
      */
     private static void defendersWin()
     {
+        readStats();
+        //todo read / write to file to update stats.
         System.out.println("Defenders win");
     }
 
@@ -643,7 +713,16 @@ public final class TablutSpinoff extends Application implements Playable
      */
     private static void attackersWin()
     {
+        //todo read / write to file to update stats.
         System.out.println("Attackers win");
+    }
+
+    private static void readStats()
+    {
+        final List<String> stats;
+        //todo use method reference for Objects::nonNull
+        // stream it
+
     }
 
     /*
@@ -660,8 +739,8 @@ public final class TablutSpinoff extends Application implements Playable
             currentMove = Player.DEFENDER;
             thisMove = nextMove;
             nextMove = selectMovement();
-            thisMoveLabel.setText(THIS_MOVE + thisMove.toString());
-            nextMoveLabel.setText(NEXT_MOVE + nextMove.toString());
+            THIS_MOVE_LABEL.setText(THIS_MOVE + thisMove.toString());
+            NEXT_MOVE_LABEL.setText(NEXT_MOVE + nextMove.toString());
         }
     }
 
@@ -670,7 +749,7 @@ public final class TablutSpinoff extends Application implements Playable
      */
     private static void clearSelectColors()
     {
-        for (final Button[] row : board)
+        for (final Button[] row : BOARD)
         {
             for (final Button btn : row)
             {
@@ -701,8 +780,38 @@ public final class TablutSpinoff extends Application implements Playable
     }
 
     /*
+     * Validates that objects are not null.
+     * @param obj the object to check.
+     * @param <T> any object.
+     */
+    private static <T> void validateNonNull(final T obj)
+    {
+        if (obj == null)
+        {
+            throw new IllegalArgumentException("Object cannot be null!");
+        }
+    }
+
+    /*
+     * Validates that a position is not null and is on the board.
+     * @param pos the position to validate.
+     */
+    private static void validatePosition(final Position pos)
+    {
+        validateNonNull(pos);
+        Position.validateCol(pos.col);
+        Position.validateRow(pos.row);
+    }
+
+    /*
      * Allows the creation of position object to aid in mapping
      * the game board.
+     *
+     * Note to self or anyone who reads:
+     * All positions are stored in y, x form (opposed to x, y).
+     * row is y, col is x.
+     * Greater y moves down the board and lesser y moves up the board.
+     * Greater x moves to the right and lesser x moves to the left.
      */
     private static class Position
     {
