@@ -26,8 +26,26 @@ VBox {
     -fx-alignment: center;
 }
 
-Label {
+.root {
+    -fx-background-color: #f8d082;
+}
+
+.title {
+    -fx-font-size: 30px;
+    -fx-text-fill: #363736;
+    -fx-font-weight: bold;
+}
+
+.moveLabel {
     -fx-font-size: 20px;
     -fx-text-fill: #363736;
     -fx-font-weight: bold;
+}
+
+.menuBtn {
+    -fx-font-size: 20px;
+    -fx-background-color: #4CAF50;
+    -fx-text-fill: white;
+    -fx-border-radius: 5;
+    -fx-padding: 5 10;
 }

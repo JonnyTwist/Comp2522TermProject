@@ -8,15 +8,25 @@ import static org.junit.jupiter.api.Assertions.*;
 class PieceTest
 {
 
+    private Piece p1;
+    private Piece p2;
+    private Piece p3;
+
+
     @BeforeEach
     void setUp()
     {
-        //todo create at least 2 piece objects maybe 3
+        p1 = new Pawn(Player.DEFENDER);
+        p2 = new Pawn(Player.ATTACKER);
+        p3 = King.getInstance();
     }
 
     @Test
     void getOwner()
     {
+        assertEquals(Player.DEFENDER, p1.getOwner());
+        assertEquals(Player.ATTACKER, p2.getOwner());
+        assertEquals(Player.DEFENDER, p3.getOwner());
     }
 
     @Test

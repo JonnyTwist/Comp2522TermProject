@@ -19,7 +19,12 @@ import java.util.concurrent.CountDownLatch;
 
 import javafx.scene.image.ImageView;
 
-//todo try to implement clonable on a piece
+/**
+ * Defines the majority of how a tablut spinoff game is played.
+ * Defines how the pawns and kings will move as well as the board.
+ * @author Jonny Twist
+ * @version 1.0
+ */
 public final class TablutSpinoff extends Application implements Playable
 {
     private enum Movement {
@@ -77,6 +82,9 @@ public final class TablutSpinoff extends Application implements Playable
     private static final String ATK_WIN_STR = "Attacker Wins: ";
     private static final String DFD_WIN_STR = "Defender Wins: ";
 
+    private static final String MOVE_LABEL_STYLE = "moveLabel";
+    private static final String MENU_BTN_STYLE = "menuBtn";
+
     private static final int            SINGLE_THREAD = 1;
     private static final Button[][]     BOARD;
     private static final Piece[][]      PIECES;
@@ -86,7 +94,7 @@ public final class TablutSpinoff extends Application implements Playable
 
     private static final Scene MENU_SCENE;
     private static final Scene RULES_SCENE;
-    private static Scene       gameScene;
+    private static final Scene GAME_SCENE;
     private static Stage       stage;
 
     private static final int FIRST_ELEMENT  = 0;
@@ -123,6 +131,9 @@ public final class TablutSpinoff extends Application implements Playable
 
         THIS_MOVE_LABEL = new Label();
         NEXT_MOVE_LABEL = new Label();
+        THIS_MOVE_LABEL.getStyleClass().add(MOVE_LABEL_STYLE);
+        NEXT_MOVE_LABEL.getStyleClass().add(MOVE_LABEL_STYLE);
+
         WIN_POSITIONS   = chooseWinPos();
 
         MENU_SCENE  = createMenuScene();
@@ -130,7 +141,8 @@ public final class TablutSpinoff extends Application implements Playable
 
         //todo gameScene must exist before giving it a styleSheet but it needs to be the correct instance
         // look into making this static instead of reseting every time we click new game
-        gameScene = prepareGameScene();
+        GAME_SCENE = new Scene(new VBox(), DEFAULT_SCENE_WIDTH_PX, DEFAULT_SCENE_HEIGHT_PX);
+        prepareGameScene();
 
         latch = new CountDownLatch(SINGLE_THREAD);
     }
@@ -162,14 +174,12 @@ public final class TablutSpinoff extends Application implements Playable
             latch.countDown();
         });
 
-        //todo fix the styles not loading for gameScene
-
         try
         {
             MENU_SCENE.getStylesheets()
                     .add(getClass().getResource("/styles/tablutStyles.css")
                                  .toExternalForm());
-            gameScene.getStylesheets()
+            GAME_SCENE.getStylesheets()
                     .add(getClass().getResource("/styles/tablutStyles.css")
                                  .toExternalForm());
             RULES_SCENE.getStylesheets()
@@ -209,16 +219,21 @@ public final class TablutSpinoff extends Application implements Playable
         final VBox layout;
         final Scene scene;
 
-        titleLabel = new Label("Tablut x Chess");
+        titleLabel = new Label("2 player\nTablut x Chess");
+        titleLabel.getStyleClass().add("title");
+
         startButton = new Button("Start Game");
         instructionsButton = new Button("Instructions");
+
+        startButton.getStyleClass().add(MENU_BTN_STYLE);
+        instructionsButton.getStyleClass().add(MENU_BTN_STYLE);
 
         layout = new VBox(titleLabel, startButton, instructionsButton);
         scene = new Scene(layout, DEFAULT_SCENE_WIDTH_PX, DEFAULT_SCENE_HEIGHT_PX);
 
         startButton.setOnAction(e -> {
-            gameScene = prepareGameScene();
-            stage.setScene(gameScene);
+            prepareGameScene();
+            stage.setScene(GAME_SCENE);
         });
 
         instructionsButton.setOnAction(e -> {
@@ -326,16 +341,12 @@ public final class TablutSpinoff extends Application implements Playable
      * Creates the scene.
      * @return a grid of buttons to be used as the game board.
      */
-    private static Scene prepareGameScene()
+    private static void prepareGameScene()
     {
         final VBox vbox;
-        final Scene scene;
         prepareGameStart();
 
         vbox = new VBox();
-        scene = new Scene(vbox,
-                          DEFAULT_SCENE_WIDTH_PX,
-                          DEFAULT_SCENE_HEIGHT_PX);
 
         THIS_MOVE_LABEL.setText(THIS_MOVE + thisMove.toString());
         NEXT_MOVE_LABEL.setText(NEXT_MOVE + nextMove.toString());
@@ -375,7 +386,7 @@ public final class TablutSpinoff extends Application implements Playable
 
         addWinPositions();
 
-        return scene;
+        GAME_SCENE.setRoot(vbox);
     }
 
     /*
@@ -483,9 +494,21 @@ public final class TablutSpinoff extends Application implements Playable
     {
         validateNonNull(btn);
 
+        updateButtonImage(btn);
+
         final ImageView imageView;
         imageView = Piece.getPieceImageView(piece);
-        btn.setGraphic(imageView);
+
+        if (piece != null &&
+            imageView == null)
+        {
+            btn.setText(piece.toString());
+        }
+        else
+        {
+            btn.setText("");
+            btn.setGraphic(imageView);
+        }
     }
 
     /*
@@ -720,6 +743,7 @@ public final class TablutSpinoff extends Application implements Playable
 
     /*
      * Moves a piece from one tile to another.
+     * If the piece images have failed to load moves the text around.
      * @param piece the piece to be moved.
      * @param newPos the new position of the piece.
      * @param btn the button that will be updated to show the new
@@ -742,6 +766,7 @@ public final class TablutSpinoff extends Application implements Playable
         PIECES[lastClickedPos.row][lastClickedPos.col] = null;
 
         updateButtonImage(btnToClear);
+        btnToClear.setText("");
 
         if (PIECES[newPos.row][newPos.col] != null &&
                 PIECES[newPos.row][newPos.col].isKing())

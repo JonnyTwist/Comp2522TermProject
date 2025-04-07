@@ -10,16 +10,14 @@ import javafx.scene.image.ImageView;
  */
 abstract class Piece
 {
-    private static final int   IMAGE_PADDING_PX = 10;
-    private static final Image ATTACKER_IMAGE;
-    private static final Image DEFENDER_IMAGE;
-    private static final Image KING_IMAGE;
+    private static final int IMAGE_PADDING_PX = 10;
+    private static Image attackerImage;
+    private static Image defenderImage;
+    private static Image kingImage;
 
     static
     {
-        ATTACKER_IMAGE = new Image("images/attacker.png");
-        DEFENDER_IMAGE = new Image("images/defender.png");
-        KING_IMAGE = new Image("images/king.png");
+        initializeImages();
     }
 
     private final Player owner;
@@ -79,6 +77,38 @@ abstract class Piece
         return isKing;
     }
 
+    /*
+     * Tries to create the images and if it cant find them
+     * makes the images null.
+     */
+    private static void initializeImages()
+    {
+        try
+        {
+            attackerImage = new Image("images/attacker.png");
+        }
+        catch (final Exception ex)
+        {
+            attackerImage = null;
+        }
+        try
+        {
+            defenderImage = new Image("images/defender.png");
+        }
+        catch (final Exception ex)
+        {
+            defenderImage = null;
+        }
+        try
+        {
+            kingImage = new Image("images/king.png");
+        }
+        catch (final Exception ex)
+        {
+            kingImage = null;
+        }
+    }
+
     /**
      * A toString method that I use for debugging only.
      * @return the type of the piece.
@@ -110,32 +140,49 @@ abstract class Piece
     }
 
     /**
-     * todo comment
-     * @param piece
-     * @return
+     * Gets the image that corresponds with the piece.
+     * If the piece does not have an image or the image failed to load
+     * return null so that the other class can handle it,
+     * @param piece the piece to get the image of.
+     * @return the image of the piece.
      */
-    //todo make non static maybe make hand in image path
     static ImageView getPieceImageView(final Piece piece)
     {
-        ImageView imageView;
-
-        imageView = null;
-
-        if (piece != null) {
-            if (piece.isKing()) {
-                imageView = new ImageView(KING_IMAGE);
-            } else if (piece.getOwner() == Player.DEFENDER) {
-                imageView = new ImageView(DEFENDER_IMAGE);
-            } else if (piece.getOwner() == Player.ATTACKER) {
-                imageView = new ImageView(ATTACKER_IMAGE);
-            }
-
-            if (imageView != null) {
-                // Make the image slightly smaller than the button
-                imageView.setFitWidth(TablutSpinoff.BTN_SIZE_PX - IMAGE_PADDING_PX);
-                imageView.setFitHeight(TablutSpinoff.BTN_SIZE_PX - IMAGE_PADDING_PX);
-            }
+        if (piece == null)
+        {
+            return null;
         }
+
+        final ImageView imageView;
+        Image image;
+
+        image = null;
+
+        if (piece.isKing())
+        {
+            image = kingImage;
+        }
+        else if (piece.getOwner() == Player.DEFENDER)
+        {
+            image = defenderImage;
+        }
+        else if (piece.getOwner() == Player.ATTACKER)
+        {
+            image = attackerImage;
+        }
+
+        // image file failed to load earlier
+        // let it be handled by the class we return to
+        if (image == null)
+        {
+            return null;
+        }
+
+        imageView = new ImageView(image);
+
+        //make the image slightly smaller than the button
+        imageView.setFitWidth(TablutSpinoff.BTN_SIZE_PX - IMAGE_PADDING_PX);
+        imageView.setFitHeight(TablutSpinoff.BTN_SIZE_PX - IMAGE_PADDING_PX);
 
         return imageView;
     }
