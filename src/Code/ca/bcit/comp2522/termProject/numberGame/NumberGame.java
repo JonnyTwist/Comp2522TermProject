@@ -38,6 +38,8 @@ public final class NumberGame
         extends RNGGame
         implements Playable
 {
+    private static final int NO_SUCCESSFUL_PLACEMENTS = 0;
+    private static final int NO_GAMES_LOST           = 0;
     private static final int NO_GAMES_PLAYED         = 0;
     private static final int SINGULAR                = 1;
     private static final int DEFAULT_INT             = 0;
@@ -83,9 +85,9 @@ public final class NumberGame
         this.placedNums       = new int[TOTAL_CHOSEN_NUMS];
         this.latch            = new CountDownLatch(SINGLE_THREAD);
 
-        this.gamesPlayed          = 0;
-        this.gamesLost            = 0;
-        this.successfulPlacements = 0;
+        this.gamesPlayed          = NO_GAMES_PLAYED;
+        this.gamesLost            = NO_GAMES_LOST;
+        this.successfulPlacements = NO_SUCCESSFUL_PLACEMENTS;
 
         displayNextNum.setId("mainLabel");
     }
@@ -450,7 +452,8 @@ public final class NumberGame
         alert.getButtonTypes().setAll(playAgainBtn, quitBtn);
 
         alert.showAndWait().ifPresent(response -> {
-            if (response == playAgainBtn) {
+            if (response == playAgainBtn)
+            {
                 restartGame();
             }
             else
@@ -463,7 +466,6 @@ public final class NumberGame
     }
 
     /*
-     * todo check about making the pop up appear when the user continues as well.
      * Creates a pop-up alert to show the final Score before the user exits.
      * @param message the pop up message.
      */
@@ -537,51 +539,37 @@ public final class NumberGame
 
         if (gamesPlayed != NO_GAMES_PLAYED)
         {
+
+            final String gameOrGames;
+            if (gamesPlayed > SINGULAR)
+            {
+                gameOrGames = " games";
+            }
+            else
+            {
+                gameOrGames = " game";
+            }
+
             if (gamesLost == gamesPlayed)
             {
                 msg.append("You lost ")
                         .append(gamesLost)
                         .append(" out of ")
-                        .append(gamesPlayed);
-
-                if (gamesPlayed > SINGULAR)
-                {
-                    msg.append(" games");
-                }
-                else
-                {
-                    msg.append(" game");
-                }
+                        .append(gamesPlayed)
+                        .append(gameOrGames);
             }
             else
             {
                 msg.append("You won ")
                         .append(gamesPlayed - gamesLost)
                         .append(" out of ")
-                        .append(gamesPlayed);
-
-                if (gamesPlayed > SINGULAR)
-                {
-                    msg.append(" games");
-                }
-                else
-                {
-                    msg.append(" game");
-                }
-
-                msg.append(" and you lost ")
+                        .append(gamesPlayed)
+                        .append(gameOrGames)
+                        .append(" and you lost ")
                         .append(gamesLost)
                         .append(" out of ")
-                        .append(gamesPlayed);
-
-                if (gamesPlayed > SINGULAR)
-                {
-                    msg.append(" games");
-                }
-                else
-                {
-                    msg.append(" game");
-                }
+                        .append(gamesPlayed)
+                        .append(gameOrGames);
             }
 
             msg.append(", with ")

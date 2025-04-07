@@ -4,7 +4,9 @@ import ca.bcit.comp2522.termProject.Playable;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -82,6 +84,11 @@ public final class TablutSpinoff extends Application implements Playable
     private static final Label          NEXT_MOVE_LABEL;
     private static final List<Position> WIN_POSITIONS;
 
+    private static final Scene MENU_SCENE;
+    private static final Scene RULES_SCENE;
+    private static Scene       gameScene;
+    private static Stage       stage;
+
     private static final int FIRST_ELEMENT  = 0;
     private static final int SECOND_ELEMENT = 1;
 
@@ -117,40 +124,55 @@ public final class TablutSpinoff extends Application implements Playable
         THIS_MOVE_LABEL = new Label();
         NEXT_MOVE_LABEL = new Label();
         WIN_POSITIONS   = chooseWinPos();
+
+        MENU_SCENE  = createMenuScene();
+        RULES_SCENE = createInstructionScene();
+
+        //todo gameScene must exist before giving it a styleSheet but it needs to be the correct instance
+        // look into making this static instead of reseting every time we click new game
+        gameScene = prepareGameScene();
+
+        latch = new CountDownLatch(SINGLE_THREAD);
     }
 
-    private final CountDownLatch latch;
+    private static final CountDownLatch latch;
 
     /**
      * Constructor for a TablutSpinoff object.
      */
     public TablutSpinoff()
     {
-        this.latch = new CountDownLatch(SINGLE_THREAD);
+        //latch = new CountDownLatch(SINGLE_THREAD);
     }
 
     /**
-     * Calls all required methods to set up the game
-     * and start it.
+     * Sets up the stage and sets the active scene to the menu
      */
-    public void start(final Stage primaryStage)
+    @Override
+    public void start(final Stage stage)
     {
-        final Scene scene;
-
         Platform.setImplicitExit(false);
 
-        currentMove = Player.DEFENDER;
-        thisMove = selectMovement();
-        nextMove = selectMovement();
+        stage.setTitle("My Game");
+        stage.setScene(MENU_SCENE);
 
-        scene = prepareScene();
+        stage.setOnCloseRequest(event -> {
+            stage.hide();
+            event.consume();
+            latch.countDown();
+        });
 
-        primaryStage.setTitle("My Game");
-        primaryStage.setScene(scene);
+        //todo fix the styles not loading for gameScene
 
         try
         {
-            scene.getStylesheets()
+            MENU_SCENE.getStylesheets()
+                    .add(getClass().getResource("/styles/tablutStyles.css")
+                                 .toExternalForm());
+            gameScene.getStylesheets()
+                    .add(getClass().getResource("/styles/tablutStyles.css")
+                                 .toExternalForm());
+            RULES_SCENE.getStylesheets()
                     .add(getClass().getResource("/styles/tablutStyles.css")
                                  .toExternalForm());
         }
@@ -159,16 +181,77 @@ public final class TablutSpinoff extends Application implements Playable
             System.out.println("Error: Could not find stylesheet");
         }
 
-        primaryStage.setOnCloseRequest(event -> {
-            primaryStage.hide();
-            event.consume();
-            latch.countDown();
+        stage.show();
+        stage.toFront();
+        stage.requestFocus();
+    }
+
+    /*
+     * prepares some of the games variables for when the game
+     * is started or restarted.
+     */
+    private static void prepareGameStart()
+    {
+        currentMove = Player.DEFENDER;
+        thisMove = selectMovement();
+        nextMove = selectMovement();
+    }
+
+    /*
+     * Creates the menu scene.
+     * @return the menu scene.
+     */
+    private static Scene createMenuScene()
+    {
+        final Button startButton;
+        final Button instructionsButton;
+        final Label titleLabel;
+        final VBox layout;
+        final Scene scene;
+
+        titleLabel = new Label("Tablut x Chess");
+        startButton = new Button("Start Game");
+        instructionsButton = new Button("Instructions");
+
+        layout = new VBox(titleLabel, startButton, instructionsButton);
+        scene = new Scene(layout, DEFAULT_SCENE_WIDTH_PX, DEFAULT_SCENE_HEIGHT_PX);
+
+        startButton.setOnAction(e -> {
+            gameScene = prepareGameScene();
+            stage.setScene(gameScene);
         });
 
-        primaryStage.show();
+        instructionsButton.setOnAction(e -> {
+            stage.setScene(RULES_SCENE);
+        });
 
-        primaryStage.toFront();
-        primaryStage.requestFocus();
+        return scene;
+    }
+
+    /*
+     * Creates the instruction scene.
+     * @return the instruction scene.
+     */
+    private static Scene createInstructionScene()
+    {
+        final Label instructions;
+        final Button backButton;
+        final VBox layout;
+
+        instructions = new Label("Instructions:\n\t" +
+                                         "- Every player rotation a new chess move is selected at random\n\t" +
+                                         "- Use the forseight of what the next move will be to your advantage\n\t" +
+                                         "- White's goal is to get their king to one of the green tiles\n\t" +
+                                         "- The king moves like a king from chess at all times\n\t" +
+                                         "- Black's goal is to capture the king\n\t" +
+                                         "- The king cannot be captured on the center tile\n\t" +
+                                         "- Once the king leaves the center tile it cannot return");
+        backButton = new Button("Back");
+        layout = new VBox(instructions, backButton);
+
+        backButton.setOnAction(e -> stage.setScene(MENU_SCENE));
+
+        return new Scene(layout, DEFAULT_SCENE_WIDTH_PX, DEFAULT_SCENE_HEIGHT_PX);
     }
 
     /*
@@ -243,10 +326,11 @@ public final class TablutSpinoff extends Application implements Playable
      * Creates the scene.
      * @return a grid of buttons to be used as the game board.
      */
-    private static Scene prepareScene()
+    private static Scene prepareGameScene()
     {
         final VBox vbox;
         final Scene scene;
+        prepareGameStart();
 
         vbox = new VBox();
         scene = new Scene(vbox,
@@ -398,7 +482,6 @@ public final class TablutSpinoff extends Application implements Playable
                                           final Piece piece)
     {
         validateNonNull(btn);
-        validateNonNull(piece);
 
         final ImageView imageView;
         imageView = Piece.getPieceImageView(piece);
@@ -705,7 +788,7 @@ public final class TablutSpinoff extends Application implements Playable
     {
         readStats();
         //todo read / write to file to update stats.
-        System.out.println("Defenders win");
+        displayAlert("Defenders win");
     }
 
     /*
@@ -714,7 +797,7 @@ public final class TablutSpinoff extends Application implements Playable
     private static void attackersWin()
     {
         //todo read / write to file to update stats.
-        System.out.println("Attackers win");
+        displayAlert("Attackers win");
     }
 
     private static void readStats()
@@ -723,6 +806,35 @@ public final class TablutSpinoff extends Application implements Playable
         //todo use method reference for Objects::nonNull
         // stream it
 
+    }
+
+    private static void displayAlert(final String message)
+    {
+        final Alert      alert;
+        final ButtonType continueBtn;
+        final ButtonType quitBtn;
+
+
+        alert = new Alert(Alert.AlertType.NONE);
+        alert.setTitle("Game over");
+        alert.setContentText(message);
+
+        continueBtn = new ButtonType("Continue");
+        quitBtn = new ButtonType("Quit");
+
+        alert.getButtonTypes().setAll(continueBtn, quitBtn);
+
+        alert.showAndWait().ifPresent(response -> {
+            if (response == continueBtn)
+            {
+                stage.setScene(MENU_SCENE);
+            }
+            else
+            {
+                stage.hide();
+                latch.countDown();
+            }
+        });
     }
 
     /*
@@ -766,9 +878,8 @@ public final class TablutSpinoff extends Application implements Playable
         try
         {
             Platform.runLater(() -> {
-                final Stage newStage;
-                newStage = new Stage();
-                start(newStage);
+                stage = new Stage();
+                start(stage);
             });
 
             latch.await();

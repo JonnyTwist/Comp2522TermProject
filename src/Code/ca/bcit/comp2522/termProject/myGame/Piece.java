@@ -88,9 +88,25 @@ abstract class Piece
     {
         if (isKing)
         {
-            return owner == Player.DEFENDER ? "D_K" : "A_K"; // Defender King, Attacker King (A_K is not real)
+            // Defender King, Attacker King (A_K is not real in tablut)
+            if (owner == Player.DEFENDER)
+            {
+                return "D_K";
+            }
+            else
+            {
+                return "A_K";
+            }
         }
-        return owner == Player.DEFENDER ? "D" : "A"; // Defender, Attacker
+        // Defender, Attacker
+        if (owner == Player.DEFENDER)
+        {
+            return "D";
+        }
+        else
+        {
+            return "A";
+        }
     }
 
     /**
