@@ -1,4 +1,4 @@
-package ca.bcit.comp2522.termProject.myGame;
+package ca.bcit.comp2522.termproject.tablut;
 
 /**
  * Allows creation of Pawns.

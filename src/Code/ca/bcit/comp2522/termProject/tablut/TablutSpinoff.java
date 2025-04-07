@@ -1,6 +1,6 @@
-package ca.bcit.comp2522.termProject.myGame;
+package ca.bcit.comp2522.termproject.tablut;
 
-import ca.bcit.comp2522.termProject.Playable;
+import ca.bcit.comp2522.termproject.Playable;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Scene;

@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import ca.bcit.comp2522.termProject.wordGame.Score;
+import ca.bcit.comp2522.termproject.wordgame.Score;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;

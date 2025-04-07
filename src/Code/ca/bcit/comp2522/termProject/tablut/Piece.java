@@ -1,4 +1,4 @@
-package ca.bcit.comp2522.termProject.myGame;
+package ca.bcit.comp2522.termproject.tablut;
 
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;

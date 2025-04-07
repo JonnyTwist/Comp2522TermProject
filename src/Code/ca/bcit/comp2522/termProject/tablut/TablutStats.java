@@ -1,4 +1,4 @@
-package ca.bcit.comp2522.termProject.myGame;
+package ca.bcit.comp2522.termproject.tablut;
 
 import java.io.IOException;
 import java.nio.file.Files;

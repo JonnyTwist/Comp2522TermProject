@@ -1,4 +1,4 @@
-package ca.bcit.comp2522.termProject.wordGame;
+package ca.bcit.comp2522.termproject.wordgame;
 
 /**
  * Creates country objects to store the name, capital's name and facts about

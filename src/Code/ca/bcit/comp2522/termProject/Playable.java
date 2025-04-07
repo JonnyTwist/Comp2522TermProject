@@ -1,4 +1,4 @@
-package ca.bcit.comp2522.termProject;
+package ca.bcit.comp2522.termproject;
 
 /**
  * A functional interface for my games.

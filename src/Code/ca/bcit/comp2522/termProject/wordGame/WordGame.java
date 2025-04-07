@@ -1,6 +1,6 @@
-package ca.bcit.comp2522.termProject.wordGame;
+package ca.bcit.comp2522.termproject.wordgame;
 
-import ca.bcit.comp2522.termProject.Playable;
+import ca.bcit.comp2522.termproject.Playable;
 
 import java.util.Scanner;
 import java.util.Random;

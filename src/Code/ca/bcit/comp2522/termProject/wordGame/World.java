@@ -1,4 +1,4 @@
-package ca.bcit.comp2522.termProject.wordGame;
+package ca.bcit.comp2522.termproject.wordgame;
 
 import java.util.Map;
 import java.util.HashMap;

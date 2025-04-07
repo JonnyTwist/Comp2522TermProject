@@ -1,8 +1,8 @@
-package ca.bcit.comp2522.termProject;
+package ca.bcit.comp2522.termproject;
 
-import ca.bcit.comp2522.termProject.myGame.TablutSpinoff;
-import ca.bcit.comp2522.termProject.numberGame.NumberGame;
-import ca.bcit.comp2522.termProject.wordGame.WordGame;
+import ca.bcit.comp2522.termproject.tablut.TablutSpinoff;
+import ca.bcit.comp2522.termproject.numbergame.NumberGame;
+import ca.bcit.comp2522.termproject.wordgame.WordGame;
 import javafx.application.Platform;
 
 import java.util.Scanner;
