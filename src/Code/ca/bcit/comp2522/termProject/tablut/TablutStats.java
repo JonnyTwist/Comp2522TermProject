@@ -7,8 +7,13 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
+/**
+ * A helper class for Tablut game to manage reading, writing and formatting
+ * of the game statistics.
+ * @author Jonny Twist
+ * @version 1.0
+ */
 final class TablutStats
 {
     private static final int DEFAULT_STAT_WINS  = 0;
@@ -95,6 +100,16 @@ final class TablutStats
         return stats;
     }
 
+    /**
+     * Writes the updated statistics to a specified file.
+     * This method takes a list of stats and writes them to a file, ensuring that the file is created
+     * if it doesn't already exist and truncates the existing file if necessary. It validates the
+     * statistics and the file name before attempting to write the data to the file.
+     * If an error occurs during the file writing process, an error message is printed to the console.
+     *
+     * @param stats the stats to write into the file. Contains attacker wins and defender wins.
+     * @param fileName the name of the file to write our stats to.
+     */
     static void writeStats(final List<String> stats, final String fileName)
     {
         validateStats(stats);
@@ -121,6 +136,16 @@ final class TablutStats
         }
     }
 
+    /*
+     * Formats the statistics list into a string for output. The format consists of two lines:
+     * one for the attacker wins and one for the defender wins. Each line contains the stat label
+     * followed by the corresponding value. The statistics are validated
+     * before formatting the output string.
+     *
+     * @param stats the list of statistics to be formatted. The list must contain exactly two elements:
+     *              one for attacker wins and one for defender wins.
+     * @return a string representing the formatted statistics, with each stat on a new line.
+     */
     private static String formatOutput(final List<String> stats)
     {
         validateStats(stats);
@@ -136,6 +161,14 @@ final class TablutStats
         return output.toString();
     }
 
+    /**
+     * Updates the statistics by incrementing the statistic of a specified player.
+     * Validates input to ensure that stats are valid and that the winner is valid.
+     *
+     * @param winner the player who won the game and will be incremented.
+     * @param stats the list of stats to update.
+     * @return an updated version of the statistics.
+     */
     static List<String> updateStats(final Player winner,
                                     final List<String> stats)
     {
@@ -165,6 +198,15 @@ final class TablutStats
         return stats;
     }
 
+    /*
+     * Extracts the integer value from a string that contains a stat count
+     * by removing the specified prefix and parsing the remaining string to an integer.
+     * If the parsing fails then return the DEFAULT_STAT_WINS
+     *
+     * @param line the string containing the stat.
+     * @param prefix the prefix to remove from the beginning of the line before parsing the integer.
+     * @return the extracted integer value, or DEFAULT_STAT_WINS if parsing fails.
+     */
     private static int extractStatCount(final String line, final String prefix)
     {
         try
@@ -177,6 +219,10 @@ final class TablutStats
         }
     }
 
+    /*
+     * Validates that the winner is one of the players in the tablut game.
+     * @param winner the winner to validate.
+     */
     private static void validateWinner(final Player winner)
     {
         if (winner != Player.DEFENDER &&
@@ -186,6 +232,11 @@ final class TablutStats
         }
     }
 
+    /*
+     * Validates that the stats is not null, contains the expected number of stats
+     * and that the statistics themselves are valid.
+     * @param stats the statistics to validate.
+     */
     private static void validateStats(final List<String> stats)
     {
         final String stat1;
@@ -208,6 +259,11 @@ final class TablutStats
         validateStat(stat2);
     }
 
+    /*
+     * Validates a single statistic to ensure that it
+     * starts with one of the expected prefixes.
+     * @param stat the stat to validate.
+     */
     private static void validateStat(final String stat)
     {
         if (!(stat.startsWith(ATTACK_WIN_STR) ||
@@ -217,6 +273,10 @@ final class TablutStats
         }
     }
 
+    /*
+     * Validates that a file name is not null or blank.
+     * @param fileName the file name to validate.
+     */
     private static void validateFileName(final String fileName)
     {
         if (fileName == null || fileName.isBlank())

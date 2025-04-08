@@ -1,2 +1,2 @@
-Attacker Wins: 1
+Attacker Wins: 3
 Defender Wins: 3

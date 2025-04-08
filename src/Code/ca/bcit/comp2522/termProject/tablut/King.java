@@ -10,11 +10,22 @@ final class King extends Piece
 {
     private static King instance;
 
+    /*
+     * Private constructor to prevent instantiation from other classes.
+     * The constructor ensures that the King is always created as a defender piece
+     * and is set to be a king according to Piece.
+     */
     private King()
     {
         super(Player.DEFENDER, true);
     }
 
+    /**
+     * Retrieves the unique instance of the King.
+     * If the instance doesn't already exist, it is created.
+     *
+     * @return the single instance of the King.
+     */
     static King getInstance()
     {
         if (instance == null)
@@ -25,9 +36,11 @@ final class King extends Piece
     }
 
     /**
-     * toString mainly for debugging but also works in
-     * emergencies if the king image fails to load.
-     * @return the owner and piece type.
+     * Returns a string representation of the King piece,
+     * useful for debugging purposes or as a fallback if the image fails to load.
+     * The string includes the ownership of the King (Defender or Attacker).
+     *
+     * @return a string representing the King, including its owner.
      */
     @Override
     public String toString()

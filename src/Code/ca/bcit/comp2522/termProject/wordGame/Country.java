@@ -7,7 +7,7 @@ package ca.bcit.comp2522.termproject.wordgame;
  * @author Jonny Twist
  * @version 1.0
  */
-class Country
+final class Country
 {
 
     static final  int      REQUIRED_NUM_FACTS = 3;

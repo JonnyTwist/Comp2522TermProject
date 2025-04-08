@@ -7,6 +7,7 @@ Lesson 2: IllegalArgumentExceptions in validator methods (ex: validateOwner in P
 
 Lesson 3: Abstract Piece Class + Final King/Pawn Class + Final TablutSpinoff Class
 
+
 Lesson 4: Playable Interface
 
 Lesson 5: Array in TablutSpinoff class
@@ -23,3 +24,5 @@ Lesson 9: Gui in TablutSpinoff
 Lesson 10: PieceTest unit tests
 
 Lesson 11: Singleton in King class
+
+Lesson 12: Platform.runLater() in TablutSpinoff

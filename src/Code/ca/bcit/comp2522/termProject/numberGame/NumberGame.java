@@ -520,7 +520,6 @@ public final class NumberGame
     }
 
     /*
-     * todo modularize / make shorter
      * creates a message to show the user their statistics from
      * playing the number game.
      * @return the message we generated.

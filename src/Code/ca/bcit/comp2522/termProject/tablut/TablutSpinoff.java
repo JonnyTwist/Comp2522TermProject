@@ -9,8 +9,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -26,6 +24,11 @@ import javafx.scene.image.ImageView;
  */
 public final class TablutSpinoff extends Application implements Playable
 {
+    /*
+     * Represents the movement pattern a piece can use.
+     * These mimic chess-style movements and can be used to
+     * configure how pieces are allowed to move on the board.
+     */
     private enum Movement {
         KNIGHT,
         BISHOP,
@@ -83,7 +86,7 @@ public final class TablutSpinoff extends Application implements Playable
     private static final String MENU_BTN_STYLE = "menuButton";
 
     private static final int            SINGLE_THREAD = 1;
-    private static final CountDownLatch latch;
+    private static final CountDownLatch LATCH;
 
     private static final Button[][]     BOARD;
     private static final Piece[][]      PIECES;
@@ -140,7 +143,7 @@ public final class TablutSpinoff extends Application implements Playable
         GAME_SCENE = new Scene(new VBox(), DEFAULT_SCENE_WIDTH_PX, DEFAULT_SCENE_HEIGHT_PX);
         prepareGameScene();
 
-        latch = new CountDownLatch(SINGLE_THREAD);
+        LATCH = new CountDownLatch(SINGLE_THREAD);
     }
 
     /**
@@ -161,7 +164,7 @@ public final class TablutSpinoff extends Application implements Playable
         stage.setOnCloseRequest(event -> {
             stage.hide();
             event.consume();
-            latch.countDown();
+            LATCH.countDown();
         });
 
         try
@@ -256,7 +259,7 @@ public final class TablutSpinoff extends Application implements Playable
 
         instructions = new Label("Instructions:\n\t" +
                                          "- Every player rotation a new chess move is selected at random\n\t" +
-                                         "- Use the forseight of what the next move will be to your advantage\n\t" +
+                                         "- Use the foresight of what the next move will be to your advantage\n\t" +
                                          "- White's goal is to get their king to one of the green tiles\n\t" +
                                          "- The king moves like a king from chess at all times\n\t" +
                                          "- Black's goal is to capture the king\n\t" +
@@ -348,8 +351,19 @@ public final class TablutSpinoff extends Application implements Playable
     }
 
     /*
-     * Creates the scene.
-     * @return a grid of buttons to be used as the game board.
+     * Prepares the game scene by setting up the game board with buttons for each position.
+     * It initializes the game state, updates the UI elements to reflect the current game state,
+     * and sets up the event handlers for each button.
+     *
+     * This method also creates a VBox containing labels and HBox containers for rows of buttons,
+     * where each button represents a position on the game board.
+     *
+     * The game state is displayed by updating labels that show the current and next moves.
+     * Buttons are initialized with pieces, and each button is given an event handler to respond
+     * to clicks during the game.
+     *
+     * @return a grid of buttons to be used as a board with labels above to show
+     * the game state.
      */
     private static void prepareGameScene()
     {
@@ -449,7 +463,7 @@ public final class TablutSpinoff extends Application implements Playable
      * Places pieces based on a specified position.
      * Only for starting / restarting the game.
      * @param row the y coordinate.
-     * @param col the y coordinate.
+     * @param col the x coordinate.
      * @return the piece that belongs in the specified position.
      */
     private static Piece initializePiece(final int row,
@@ -466,18 +480,21 @@ public final class TablutSpinoff extends Application implements Playable
 
         //place attackers in T-shapes on the right and left sides
         // and lines on the top and bottom
-        //todo make this more readable
-        if ((row == FIRST_ROW && (col >= LEFT_CENTER_COL && col <= RIGHT_CENTER_COL)) ||   // Top line
+        if (
+            // Top line
+            (row == FIRST_ROW && (col >= LEFT_CENTER_COL && col <= RIGHT_CENTER_COL)) ||
 
-            (row == LAST_ROW && (col >= LEFT_CENTER_COL && col <= RIGHT_CENTER_COL)) ||   // Bottom line
+            // Bottom line
+            (row == LAST_ROW && (col >= LEFT_CENTER_COL && col <= RIGHT_CENTER_COL)) ||
 
-            (col == FIRST_COL && (row >= TOP_CENTER_ROW && row <= BOTTOM_CENTER_ROW)) ||   // Left T
+            // Left T
+            (col == FIRST_COL && (row >= TOP_CENTER_ROW && row <= BOTTOM_CENTER_ROW)) ||
             (col == SECOND_COL && row == CENTER_ROW) ||
 
-            (col == LAST_COL && (row >= TOP_CENTER_ROW && row <= BOTTOM_CENTER_ROW)) ||   // Right T
+            // Right T
+            (col == LAST_COL && (row >= TOP_CENTER_ROW && row <= BOTTOM_CENTER_ROW)) ||
             (col == SECOND_LAST_COL && row == CENTER_ROW))
         {
-
             return new Pawn(Player.ATTACKER);
         }
 
@@ -534,11 +551,12 @@ public final class TablutSpinoff extends Application implements Playable
     }
 
     /*
-     * todo comment
-     * A button has been clicked.
-     * Time to figure out what it's supposed to do.
-     * @param btn
-     * @param pos
+     * Handles the logic for when a board button is clicked.
+     * Determines whether the click is a move or a piece selection,
+     * validates the action, and initiates appropriate piece movement.
+     *
+     * @param btn the button that was clicked
+     * @param pos the position on the board corresponding to the button
      */
     private static void btnClicked(final Button btn,
                                    final Position pos)
@@ -587,8 +605,12 @@ public final class TablutSpinoff extends Application implements Playable
     }
 
     /*
-     * Highlights the surrounding valid moves for the king.
-     * @param pos the position of the king.
+     * Highlights all valid one-square moves for the king.
+     * The king can move in any of the 8 directions (vertically, horizontally and diagonal),
+     * as long as the destination is on the board, not restricted,
+     * and either empty or occupied by an opponent.
+     *
+     * @param pos the current position of the king
      */
     private static void moveLikeKing(final Position pos)
     {
@@ -627,8 +649,12 @@ public final class TablutSpinoff extends Application implements Playable
     }
 
     /*
-     * Shows the valid movements for a Knight.
-     * @param pos the current position of the piece.
+     * Highlights all valid knight-like moves from the given position.
+     * Knight moves follow standard chess rules: 2 squares in one direction and 1 in the other,
+     * forming an L-shape. Movement is blocked if the destination is off the board,
+     * the center square, or occupied by the current player's own piece.
+     *
+     * @param pos the current position of the piece
      */
     private static void moveLikeKnight(final Position pos)
     {
@@ -715,10 +741,15 @@ public final class TablutSpinoff extends Application implements Playable
     }
 
     /*
-     * Helper method to check valid moves in a specific direction.
+     * Highlights all valid move positions in a straight line from a given position,
+     * following the specified row and column direction.
+     * Stops when it hits the edge of the board, a restricted tile, or an occupied space.
+     * If the occupied space belongs to the opponent and is not restricted,
+     * it is marked as a valid capture.
+     *
      * @param pos The starting position.
-     * @param rowDelta The change in row for each step (1 for down, -1 for up).
-     * @param colDelta The change in column for each step (1 for right, -1 for left).
+     * @param rowDelta The change in row for each step (positive for down, negative for up).
+     * @param colDelta The change in column for each step (positive for right, negative for left).
      */
     private static void checkDirection(final Position pos,
                                        final int rowDelta,
@@ -753,12 +784,13 @@ public final class TablutSpinoff extends Application implements Playable
     }
 
     /*
-     * Moves a piece from one tile to another.
-     * If the piece images have failed to load moves the text around.
-     * @param piece the piece to be moved.
-     * @param newPos the new position of the piece.
-     * @param btn the button that will be updated to show the new
-     * position of the piece.
+     * Executes the movement of a piece from its current position to a new position.
+     * Updates the board state, visuals, and turn. If images aren't available, text is updated instead.
+     * Also checks for victory conditions (e.g., if the king reaches a win tile or if all attackers are gone).
+     *
+     * @param piece  The piece to be moved.
+     * @param newPos The new position to move the piece to.
+     * @param btn    The button representing the destination tile, to be updated visually.
      */
     private static void makeTheMove(final Piece piece,
                                     final Position newPos,
@@ -802,6 +834,12 @@ public final class TablutSpinoff extends Application implements Playable
         }
     }
 
+    /*
+     * Checks if an attacker exists on the board.
+     * If there are no more attackers the defender has
+     * won.
+     * @return true if there is an attacker. Else false.
+     */
     private static boolean attackerExists()
     {
         for (final Piece[] row : PIECES)
@@ -818,7 +856,9 @@ public final class TablutSpinoff extends Application implements Playable
     }
 
     /*
-     * todo this
+     * Handles the logic for when the defenders win the game.
+     * Updates the defender's win statistics, writes the new stats to file,
+     * generates a victory message, and displays it to the user.
      */
     private static void defendersWin()
     {
@@ -836,7 +876,9 @@ public final class TablutSpinoff extends Application implements Playable
     }
 
     /*
-     * todo this
+     * Handles the logic for when the attackers win the game.
+     * Updates the attacker's win statistics, writes the new stats to file,
+     * generates a victory message, and displays it to the user.
      */
     private static void attackersWin()
     {
@@ -854,10 +896,11 @@ public final class TablutSpinoff extends Application implements Playable
     }
 
     /*
-     * todo comment
-     * @param winner
-     * @param stats
-     * @return
+     * Generates a message to be displayed to the user
+     * after the game has ended.
+     * @param winner the winner of the game.
+     * @param stats a list of stats to be displayed as well.
+     * @return a message ready to be displayed.
      */
     private static String generateMessage(final Player winner,
                                           final List<String> stats)
@@ -914,13 +957,16 @@ public final class TablutSpinoff extends Application implements Playable
             else
             {
                 stage.hide();
-                latch.countDown();
+                LATCH.countDown();
             }
         });
     }
 
     /*
-     * updates which player will make the next move.
+     * Updates the current player’s turn and switches to the next player.
+     * If the current player is the defender, the turn is changed to the attacker.
+     * When the attacker’s turn ends, it switches back to the defender,
+     * selects the new next movement type, and updates the labels to match the upcoming moves.
      */
     private static void updatePlayerTurn()
     {
@@ -939,7 +985,9 @@ public final class TablutSpinoff extends Application implements Playable
     }
 
     /*
-     * Clears the valid move colors as well as the selected piece color.
+     * Clears the highlighting for valid move squares and the selected piece square.
+     * This ensures after a move is completed or an empty tile is selected that the
+     * view is reset for game clarity.
      */
     private static void clearSelectColors()
     {
@@ -964,7 +1012,7 @@ public final class TablutSpinoff extends Application implements Playable
                 start(stage);
             });
 
-            latch.await();
+            LATCH.await();
         }
         catch (final Exception e)
         {

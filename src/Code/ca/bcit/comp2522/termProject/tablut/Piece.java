@@ -4,7 +4,10 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
 /**
- * An abstract class to define what all pieces have.
+ * An abstract class to define what all pieces have in common.
+ * All pieces must have an owner and may optionally be a king.
+ * Handles image representation of pieces and basic identification logic.
+ *
  * @author Jonny Twist
  * @version 1.0
  */
@@ -121,11 +124,11 @@ abstract class Piece
             // Defender King, Attacker King (A_K is not real in tablut)
             if (owner == Player.DEFENDER)
             {
-                return "D_K";
+                return "DK";
             }
             else
             {
-                return "A_K";
+                return "AK";
             }
         }
         // Defender, Attacker
