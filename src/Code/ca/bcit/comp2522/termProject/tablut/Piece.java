@@ -20,21 +20,21 @@ abstract class Piece
         initializeImages();
     }
 
-    private final Player owner;
-    private final boolean isKing;
+    private final Player  owner;
+    private final boolean king;
 
     /**
      * Constructor for a Piece object.
      * @param owner the owner of the piece.
-     * @param isKing if the piece is the king or not.
+     * @param king if the piece is the king or not.
      */
     Piece(final Player owner,
-          final boolean isKing)
+          final boolean king)
     {
         validateOwner(owner);
 
         this.owner = owner;
-        this.isKing = isKing;
+        this.king  = king;
     }
 
     /**
@@ -74,7 +74,7 @@ abstract class Piece
      */
     public final boolean isKing()
     {
-        return isKing;
+        return king;
     }
 
     /*
@@ -116,7 +116,7 @@ abstract class Piece
     @Override
     public String toString()
     {
-        if (isKing)
+        if (king)
         {
             // Defender King, Attacker King (A_K is not real in tablut)
             if (owner == Player.DEFENDER)

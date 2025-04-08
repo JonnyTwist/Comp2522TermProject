@@ -20,6 +20,6 @@ Lesson 8: Streaming in TablutSpinoff
 
 Lesson 9: Gui in TablutSpinoff
 
-Lesson 10: //todo make unit tests
+Lesson 10: PieceTest unit tests
 
 Lesson 11: Singleton in King class

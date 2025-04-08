@@ -68,3 +68,10 @@ Correct Second Attempts: 1
 Incorrect Attempts: 17
 Total Score: 5
 
+Date and Time: 2025-04-07 20:21:00
+Games Played: 1
+Correct First Attempts: 2
+Correct Second Attempts: 1
+Incorrect Attempts: 7
+Total Score: 5
+

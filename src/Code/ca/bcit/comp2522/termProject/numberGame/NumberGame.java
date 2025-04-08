@@ -19,9 +19,6 @@ import javafx.scene.control.ButtonType;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 
-//todo remove after fully testing winning
-import java.util.Arrays;
-
 /*
 make at least one interface, one abstract class,
 and one concrete class.
@@ -60,6 +57,7 @@ public final class NumberGame
     private static final String PLAY_AGAIN_TEXT      = "Play Again";
     private static final String ACTIVE_BTN           = "active";
     private static final String INACTIVE_BTN         = "inactive";
+    private static final String START_BTN_TXT        = "Start";
 
     private final int[] chosenNums;
     private final Button[][] buttons;
@@ -151,9 +149,11 @@ public final class NumberGame
 
         alert = new Alert(Alert.AlertType.NONE);
         alert.setTitle("Number Game!");
-        alert.setContentText("Welcome to the number game challenge! Press 'Start' to begin.");
+        alert.setContentText("Welcome to the number game challenge!\n" +
+                             "Place all the numbers in ascending order to win.\n" +
+                             "Press '" + START_BTN_TXT +"' to begin.");
 
-        playBtn = new ButtonType("Start");
+        playBtn = new ButtonType(START_BTN_TXT);
 
         alert.getButtonTypes().setAll(playBtn);
 
@@ -176,11 +176,6 @@ public final class NumberGame
         {
             chosenNums[i] = roll(MIN_NUM, MAX_NUM);
         }
-
-        //todo remove after fully testing winning
-
-        // Sort the array
-        //Arrays.sort(chosenNums);
     }
 
     /**
@@ -333,8 +328,6 @@ public final class NumberGame
      */
     private boolean checkValid()
     {
-        //todo look at changing this so it only compares what was just placed
-        // take in an index then
         int previous;
         int current;
 

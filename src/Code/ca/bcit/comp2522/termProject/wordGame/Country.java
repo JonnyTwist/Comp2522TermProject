@@ -10,19 +10,9 @@ package ca.bcit.comp2522.termproject.wordgame;
 class Country
 {
 
-    static final int REQUIRED_NUM_FACTS = 3;
-
-    /*
-    String name (e.g. Canada)
-    String capitalCityName (e.g. Ottawa)
-    Array (not ArrayList) facts; for example:
-    0: Home to the longest coastline in the world.
-    1: Famous for its maple syrup production, accounting for 71% of the world's supply.
-    2: One of the most multicultural nations in the world, with more than 200 ethnic
-    origins represented.
-     */
-    private final String name;
-    private final String capitalCityName;
+    static final  int      REQUIRED_NUM_FACTS = 3;
+    private final String   name;
+    private final String   capitalCityName;
     private final String[] facts;
 
     /**

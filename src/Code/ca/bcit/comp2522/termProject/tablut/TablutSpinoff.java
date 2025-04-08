@@ -4,14 +4,13 @@ import ca.bcit.comp2522.termproject.Playable;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.Label;
+import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -33,8 +32,6 @@ public final class TablutSpinoff extends Application implements Playable
         ROOK,
         QUEEN
     }
-
-    //todo dont trust params always validate data
 
     static Player currentMove = Player.DEFENDER;
 
@@ -79,13 +76,15 @@ public final class TablutSpinoff extends Application implements Playable
     private static final String WIN_TILE    = "winTile";
     private static final String THIS_MOVE   = "This Move: ";
     private static final String NEXT_MOVE   = "Next Move: ";
-    private static final String ATK_WIN_STR = "Attacker Wins: ";
-    private static final String DFD_WIN_STR = "Defender Wins: ";
+
+    private static final String STAT_FILE_NAME = "TablutStats.txt";
 
     private static final String MOVE_LABEL_STYLE = "moveLabel";
-    private static final String MENU_BTN_STYLE = "menuBtn";
+    private static final String MENU_BTN_STYLE = "menuButton";
 
     private static final int            SINGLE_THREAD = 1;
+    private static final CountDownLatch latch;
+
     private static final Button[][]     BOARD;
     private static final Piece[][]      PIECES;
     private static final Label          THIS_MOVE_LABEL;
@@ -107,8 +106,6 @@ public final class TablutSpinoff extends Application implements Playable
     private static Position lastClickedPos;
     private static Movement thisMove;
     private static Movement nextMove;
-    private static int      attackerWins;
-    private static int      defenderWins;
 
     static
     {
@@ -139,26 +136,19 @@ public final class TablutSpinoff extends Application implements Playable
         MENU_SCENE  = createMenuScene();
         RULES_SCENE = createInstructionScene();
 
-        //todo gameScene must exist before giving it a styleSheet but it needs to be the correct instance
-        // look into making this static instead of reseting every time we click new game
+        //VBox is just a placeholder for now
         GAME_SCENE = new Scene(new VBox(), DEFAULT_SCENE_WIDTH_PX, DEFAULT_SCENE_HEIGHT_PX);
         prepareGameScene();
 
         latch = new CountDownLatch(SINGLE_THREAD);
     }
 
-    private static final CountDownLatch latch;
-
     /**
-     * Constructor for a TablutSpinoff object.
-     */
-    public TablutSpinoff()
-    {
-        //latch = new CountDownLatch(SINGLE_THREAD);
-    }
-
-    /**
-     * Sets up the stage and sets the active scene to the menu
+     * Sets up the stage and sets the active scene to the menu.
+     * Initializes the main window of the application, sets the scene, and handles the close request event.
+     * It also attempts to load and apply the CSS stylesheet to all scenes.
+     *
+     * @param stage the primary stage for the application
      */
     @Override
     public void start(final Stage stage)
@@ -198,7 +188,8 @@ public final class TablutSpinoff extends Application implements Playable
 
     /*
      * prepares some of the games variables for when the game
-     * is started or restarted.
+     * is started or restarted. Ensures the first player to move
+     * is the defender and that we have two randomized moves when we start.
      */
     private static void prepareGameStart()
     {
@@ -208,8 +199,12 @@ public final class TablutSpinoff extends Application implements Playable
     }
 
     /*
-     * Creates the menu scene.
-     * @return the menu scene.
+     * Creates and returns the menu scene for the game.
+     * This scene serves as the starting point where players can choose to start a new game
+     * or view the instructions for the game. It features a title and two buttons: one for
+     * starting the game and another for accessing the rules.
+     *
+     * @return the menu scene for the game.
      */
     private static Scene createMenuScene()
     {
@@ -220,7 +215,7 @@ public final class TablutSpinoff extends Application implements Playable
         final Scene scene;
 
         titleLabel = new Label("2 player\nTablut x Chess");
-        titleLabel.getStyleClass().add("title");
+        titleLabel.getStyleClass().add("menuTitle");
 
         startButton = new Button("Start Game");
         instructionsButton = new Button("Instructions");
@@ -229,6 +224,8 @@ public final class TablutSpinoff extends Application implements Playable
         instructionsButton.getStyleClass().add(MENU_BTN_STYLE);
 
         layout = new VBox(titleLabel, startButton, instructionsButton);
+        layout.getStyleClass().add("menuLayout");
+
         scene = new Scene(layout, DEFAULT_SCENE_WIDTH_PX, DEFAULT_SCENE_HEIGHT_PX);
 
         startButton.setOnAction(e -> {
@@ -244,8 +241,12 @@ public final class TablutSpinoff extends Application implements Playable
     }
 
     /*
-     * Creates the instruction scene.
-     * @return the instruction scene.
+     * Creates and returns the instruction scene for the game.
+     * This scene displays the rules and instructions on how to play,
+     * providing guidance on the game's mechanics and objectives.
+     * Players can read the instructions and go back to the menu screen.
+     *
+     * @return the instruction scene, which includes the rules of the game.
      */
     private static Scene createInstructionScene()
     {
@@ -261,8 +262,13 @@ public final class TablutSpinoff extends Application implements Playable
                                          "- Black's goal is to capture the king\n\t" +
                                          "- The king cannot be captured on the center tile\n\t" +
                                          "- Once the king leaves the center tile it cannot return");
+        instructions.setId("instructionsText");
+
         backButton = new Button("Back");
+        backButton.setId("backButton");
+
         layout = new VBox(instructions, backButton);
+        layout.setId("instructionLayout");
 
         backButton.setOnAction(e -> stage.setScene(MENU_SCENE));
 
@@ -270,9 +276,10 @@ public final class TablutSpinoff extends Application implements Playable
     }
 
     /*
-     * Creates an Array of Positions which will be considered winning positions.
-     * (The positions that the defender must move their king)
-     * @return an Array of Positions.
+     * Creates an Array of Positions that represent the winning positions for the defender's king.
+     * These are the positions the defender needs to move their king to in order to win.
+     *
+     * @return a List of Position objects representing the winning positions.
      */
     private static List<Position> chooseWinPos()
     {
@@ -307,8 +314,11 @@ public final class TablutSpinoff extends Application implements Playable
     }
 
     /*
-     * Selects what kind of movement will be coming up.
-     * @return the randomly selected movement.
+     * Selects the type of movement that will occur next in the game.
+     * This method generates a random number to determine whether the next move
+     * will be a Knight, Rook, Bishop, or Queen.
+     *
+     * @return the randomly selected movement type (Knight, Rook, Bishop, or Queen).
      */
     private static Movement selectMovement()
     {
@@ -480,7 +490,8 @@ public final class TablutSpinoff extends Application implements Playable
             return new Pawn(Player.DEFENDER);
         }
 
-        return null;  // Empty space
+        // Empty space
+        return null;
     }
 
     /*
@@ -811,9 +822,17 @@ public final class TablutSpinoff extends Application implements Playable
      */
     private static void defendersWin()
     {
-        readStats();
-        //todo read / write to file to update stats.
-        displayAlert("Defenders win");
+        final List<String> oldStats;
+        final List<String> newStats;
+        final String message;
+
+        oldStats = TablutStats.readStats(STAT_FILE_NAME);
+        newStats = TablutStats.updateStats(Player.DEFENDER, oldStats);
+        TablutStats.writeStats(newStats, STAT_FILE_NAME);
+
+        message = generateMessage(Player.DEFENDER, newStats);
+
+        displayAlert(message);
     }
 
     /*
@@ -821,24 +840,62 @@ public final class TablutSpinoff extends Application implements Playable
      */
     private static void attackersWin()
     {
-        //todo read / write to file to update stats.
-        displayAlert("Attackers win");
+        final List<String> oldStats;
+        final List<String> newStats;
+        final String message;
+
+        oldStats = TablutStats.readStats(STAT_FILE_NAME);
+        newStats = TablutStats.updateStats(Player.ATTACKER, oldStats);
+        TablutStats.writeStats(newStats, STAT_FILE_NAME);
+
+        message = generateMessage(Player.ATTACKER, newStats);
+
+        displayAlert(message);
     }
 
-    private static void readStats()
+    /*
+     * todo comment
+     * @param winner
+     * @param stats
+     * @return
+     */
+    private static String generateMessage(final Player winner,
+                                          final List<String> stats)
     {
-        final List<String> stats;
-        //todo use method reference for Objects::nonNull
-        // stream it
+        final StringBuilder message;
+        message = new StringBuilder();
 
+        if (winner == Player.DEFENDER)
+        {
+            message.append("The defenders ");
+        }
+        else if(winner == Player.ATTACKER)
+        {
+            message.append("The attackers ");
+        }
+        else
+        {
+            //this should never appear but just incase :)
+            message.append("No one ");
+        }
+
+        message.append(" won this round!\nThe stats to date is now:\n")
+                .append(stats.getFirst())
+                .append("\n")
+                .append(stats.get(SECOND_ELEMENT));
+
+        return message.toString();
     }
 
+    /*
+     * Displays an end game alert with the outcome of the game.
+     * @param message the outcome of the game.
+     */
     private static void displayAlert(final String message)
     {
         final Alert      alert;
         final ButtonType continueBtn;
         final ButtonType quitBtn;
-
 
         alert = new Alert(Alert.AlertType.NONE);
         alert.setTitle("Game over");

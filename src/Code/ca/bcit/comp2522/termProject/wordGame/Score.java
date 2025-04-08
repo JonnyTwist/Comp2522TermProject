@@ -28,19 +28,25 @@ public final class Score {
     private static final String CORRECT_IN_ONE_PHRASE    = "Correct First Attempts: ";
     private static final String CORRECT_IN_TWO_PHRASE    = "Correct Second Attempts: ";
     private static final String INCORRECT_PHRASE         = "Incorrect Attempts: ";
-    private static final int    DOUBLE                   = 2;
-    private static final int    SMALLEST_NON_NEGATIVE    = 0;
-    private static final int    MIN_SCORE                = 0;
-    private static final int    MIN_GAMES_PLAYED         = 0;
-    private static final int    DEFAULT_PREV_HIGH        = 0;
-    private static final int    FIRST_ITEM               = 0;
-    private static final int    SECOND_ITEM              = 1;
-    private static final int    EXPECTED_SCORE_DATA_SIZE = 5;
-    private static final int    FINAL_SCORE_DATA_SIZE    = 6;
-    private static final int    SECOND_DATA_ITEM         = 1;
-    private static final int    THIRD_DATA_ITEM          = 2;
-    private static final int    FOURTH_DATA_ITEM         = 3;
-    private static final int    FIFTH_DATA_ITEM          = 4;
+    private static final String CONGRATS_MSG_START       = "CONGRATULATIONS! You are the" +
+                                                           " new high score with an average of ";
+
+    private static final int DOUBLE                   = 2;
+    private static final int SMALLEST_NON_NEGATIVE    = 0;
+    private static final int MIN_SCORE                = 0;
+    private static final int MIN_GAMES_PLAYED         = 0;
+    private static final int DEFAULT_PREV_HIGH        = 0;
+    private static final int FIRST_ITEM               = 0;
+    private static final int SECOND_ITEM              = 1;
+    private static final int EXPECTED_SCORE_DATA_SIZE = 5;
+    private static final int FINAL_SCORE_DATA_SIZE    = 6;
+    private static final int SECOND_DATA_ITEM         = 1;
+    private static final int THIRD_DATA_ITEM          = 2;
+    private static final int FOURTH_DATA_ITEM         = 3;
+    private static final int FIFTH_DATA_ITEM          = 4;
+    private static final int MIN_CORRECT_IN_ONE       = 0;
+    private static final int MIN_CORRECT_IN_TWO       = 0;
+    private static final int MIN_INCORRECT            = 0;
 
     private final String dateTimePlayed;
     private final int numGamesPlayed;
@@ -126,6 +132,35 @@ public final class Score {
         if (num < SMALLEST_NON_NEGATIVE)
         {
             throw new IllegalArgumentException("No numbers in a score object can be negative");
+        }
+    }
+
+    /*
+     * Validates that a score object is not null and contains valid instance data.
+     * @param score the score to validate
+     */
+    private static void validateScore(final Score score)
+    {
+        if (score == null)
+        {
+            throw new IllegalArgumentException("Score cannot be null");
+        }
+
+        validateNotNegative(score.numGamesPlayed);
+        validateNotNegative(score.numCorrectFirstAttempt);
+        validateNotNegative(score.numCorrectSecondAttempt);
+        validateNotNegative(score.numIncorrectSecondAttempt);
+    }
+
+    /*
+     * Validates that a file name is not null or blank.
+     * @param fileName the fileName to validate
+     */
+    private static void validateFileName(final String fileName)
+    {
+        if (fileName == null || fileName.isBlank())
+        {
+            throw new IllegalArgumentException("File name cannot be null or blank");
         }
     }
 
@@ -226,6 +261,9 @@ public final class Score {
     public static void appendScoreToFile(final Score score,
                                          final String fileName)
     {
+        validateScore(score);
+        validateFileName(fileName);
+
         final int finalScore;
         final double scoreAvg;
         final Path filePath;
@@ -299,11 +337,12 @@ public final class Score {
         }
 
         final List<Score> allScores;
+        String bestDateTime;
+        double prevHighScore;
 
         allScores = readScoresFromFile(fileName);
-
-        String bestDateTime = DEFAULT_PREV_DATE;
-        double prevHighScore = MIN_SCORE;
+        bestDateTime = DEFAULT_PREV_DATE;
+        prevHighScore = MIN_SCORE;
 
         //if the file is empty this is a new highscore (handled by compare scores)
         if (allScores.isEmpty())
@@ -359,18 +398,19 @@ public final class Score {
 
         if (bestDateTime.isBlank())
         {
-            System.out.println("CONGRATULATIONS! You are the new high score with an average of " +
-                                       scoreAvg + " points per game; there was no previous highscore");
+            System.out.println(CONGRATS_MSG_START +
+                                       scoreAvg +
+                                       " points per game; there was no previous highscore");
         }
         else if (scoreAvg > prevHighScoreAvg)
         {
             date = bestDateTime.split(" ")[FIRST_ITEM];
             time = bestDateTime.split(" ")[SECOND_ITEM];
 
-            System.out.println("CONGRATULATIONS! You are the new high score with an average of " +
-                                       scoreAvg + " points per game; the previous record was " +
-                                       prevHighScoreAvg + " points per game and was set " + date +
-                                       " at " + time + ".");
+            System.out.println(CONGRATS_MSG_START + scoreAvg +
+                                       " points per game; the previous record was " +
+                                       prevHighScoreAvg + " points per game and was set " +
+                                       date + " at " + time + ".");
         }
         else
         {
@@ -384,7 +424,10 @@ public final class Score {
     }
 
     /**
-     * Reads a file and attempts to extract a list of scores from it.
+     * Reads a file from the given path and extracts a list of valid Score objects.
+     * Groups lines of score data and parses each group into a Score using createScoreObject.
+     * Skips blank lines and invalid entries. Returns an empty list if the file doesn't exist
+     * or an error occurs while reading.
      * @param path the path to the file in String form.
      * @return A list of score object that have been read in from the file.
      */
@@ -409,20 +452,26 @@ public final class Score {
 
         try (Stream<String> lines = Files.lines(dataPath)) {
             lines.forEach(line -> {
-                if (!line.isBlank()) {
+                if (!line.isBlank())
+                {
                     scoreData.add(line);
 
-                    if (scoreData.size() == FINAL_SCORE_DATA_SIZE || line.contains(TOTAL_SCORE_PHRASE)) {
+                    if (scoreData.size() == FINAL_SCORE_DATA_SIZE ||
+                        line.contains(TOTAL_SCORE_PHRASE))
+                    {
                         final Score newScore = createScoreObject(scoreData);
 
-                        if (newScore != null) {
+                        if (newScore != null)
+                        {
                             scores.add(newScore);
                         }
                         scoreData.clear();
                     }
                 }
             });
-        } catch (final IOException ex) {
+        }
+        catch (final IOException ex)
+        {
             System.out.println("Failed to read file: " + ex);
         }
 
@@ -431,10 +480,28 @@ public final class Score {
 
     /*
      * Attempts to create a string object from a list of strings.
+     *
+     * The method expects the list to contain a fixed number of lines (as defined by
+     * EXPECTED_SCORE_DATA_SIZE), each starting with a specific phrase:
+     * - DATE_TIME_PHRASE for the date and time the game was played
+     * - GAME_PLAYED_PHRASE for the number of games played
+     * - CORRECT_IN_ONE_PHRASE for the number of correct answers on the first attempt
+     * - CORRECT_IN_TWO_PHRASE for the number of correct answers on the second attempt
+     * - INCORRECT_PHRASE for the number of incorrect answers
+     *
+     * It validates that:
+     * 1. The list is the expected size.
+     * 2. Each string starts with the appropriate identifying phrase.
+     * 3. Each numeric value can be parsed and is greater than or equal to its corresponding
+     *    minimum allowed value (e.g., MIN_GAMES_PLAYED).
+     *
+     * If all conditions are met, a new Score object is created and returned.
+     * Otherwise, the method logs a message and returns null to indicate that the
+     * data was corrupted or invalid.
+     *
      * @param scoreData A list of data that will be parsed into a Score object.
      * @return the new score object if it can be created. Else null.
      */
-    //todo validate each line to ensure all positive else throw it out
     private static Score createScoreObject(final List<String> scoreData)
     {
         final String dateTimeLine;
@@ -479,6 +546,14 @@ public final class Score {
                 correctInTwo  = Integer.parseInt(corInTwoLine.substring(CORRECT_IN_TWO_PHRASE.length()));
                 incorrect  = Integer.parseInt(incorrectLine.substring(INCORRECT_PHRASE.length()));
 
+                if (gamesPlayed < MIN_GAMES_PLAYED ||
+                    correctInOne < MIN_CORRECT_IN_ONE ||
+                    correctInTwo < MIN_CORRECT_IN_TWO ||
+                    incorrect < MIN_INCORRECT) {
+                    System.out.println("Invalid score data (negative values). Corrupted data skipped.");
+                    return null;
+                }
+
                 return new Score(dateTime,
                                  gamesPlayed,
                                  correctInOne,
@@ -499,7 +574,15 @@ public final class Score {
     }
 
     /**
-     * Custom to String method for the Score Object.
+     * Returns a string representation of the Score object in a structured and readable format.
+     * The return includes:
+     * - The date and time when the game was played.
+     * - The total number of games played during the session.
+     * - The number of questions answered correctly on the first attempt.
+     * - The number of questions answered correctly on the second attempt.
+     * - The number of questions that were still incorrect after the second attempt.
+     * - The final calculated score.
+     *
      * @return all instance variables and the formatted final score
      * in the specified format.
      */
