@@ -16,7 +16,6 @@ final class Country
     private final String[] facts;
 
     /**
-     * todo maybe change to allow more facts about the countries
      * Constructor for country objects.
      * @param name the name of the country.
      * @param capitalCityName the capital of the country.
@@ -76,7 +75,7 @@ final class Country
      * Getter for the name of the country.
      * @return the name of the country.
      */
-    public final String getName()
+    public String getName()
     {
         return name;
     }
@@ -85,7 +84,7 @@ final class Country
      * Getter for the capital of the country.
      * @return the capital of the country.
      */
-    public final String getCapitalCityName()
+    public String getCapitalCityName()
     {
         return capitalCityName;
     }
@@ -94,7 +93,7 @@ final class Country
      * Getter for the country's facts.
      * @return the facts array.
      */
-    public final String[] getFacts()
+    public String[] getFacts()
     {
         return facts;
     }

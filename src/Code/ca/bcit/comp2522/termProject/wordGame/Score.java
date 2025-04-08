@@ -12,14 +12,17 @@ import java.util.List;
 import java.util.stream.Stream;
 
 /**
- * todo comment all methods and comment better
- * Stores the score of # of games in a txt file and does some calculations
- * for if this is a new record and stuff like that.
- * Record the current time as well.
+ * Tracks statistics for the WordGame.
+ * Creates score objects to store data for a game session.
+ * Provides methods to:
+ * - Append to a score file.
+ * - Check if this is a new highscore.
+ * - Format and print score data in a readable format.
+ *
+ * @author Jonny Twist
+ * @version 1.0
  */
 public final class Score {
-
-    //todo remove all magic num and replace with constants
 
     private static final String DEFAULT_PREV_DATE        = "";
     private static final String DATE_TIME_PHRASE         = "Date and Time: ";
@@ -229,8 +232,11 @@ public final class Score {
     }
 
     /*
-     * Gets the current dateTime and returns it formatted as a String.
-     * @return the current time as a String.
+     * Formats the provided LocalDateTime as a string in the format "yyyy-MM-dd HH:mm:ss".
+     * If the provided time is null, the current system time is used.
+     *
+     * @param time the LocalDateTime to format, or null to use the current time
+     * @return the formatted date and time as a string
      */
     private String formatTime(final LocalDateTime time)
     {
@@ -255,6 +261,9 @@ public final class Score {
 
     /**
      * Appends Score objects onto the end of a file.
+     * Also calls the checkHighscore message before this so we
+     * know if this is a new record.
+     *
      * @param score the score object to be appended onto the file.
      * @param fileName the name of the file to append the score object onto.
      */
@@ -322,7 +331,6 @@ public final class Score {
      * @param dataPath the path that the data is stored in.
      * @param fileName the name of the file that the data is stored in.
      */
-    //todo look at modularizing this
     private static void checkHighscore(final double scoreAvg,
                                        final Path dataPath,
                                        final String fileName)
@@ -380,21 +388,22 @@ public final class Score {
 
 
     /*
-     * Compares the new score to the previous highscore
-     * and prints the appropriate phrase.
+     * Compares the new score with the previous highscore and prints a message.
+     * If no previous high score exists, a congratulatory message is printed.
+     * If the new score beats the previous high, a congratulatory message
+     * including details about the old highscore is printed.
+     * Otherwise, a message stating the high score remains is shown.
+     *
      * @param scoreAvg the new score that has been placed.
      * @param prevHighScoreAvg the previous highscore.
      * @param bestDateTime the time the previous highscore was placed.
      */
-    //todo ensure the prevHigh comes in as a double
     private static void compareScores(final double scoreAvg,
                                       final double prevHighScoreAvg,
                                       final String bestDateTime)
     {
         final String date;
         final String time;
-
-        //todo maybe made a private static variable to replace Congrats with
 
         if (bestDateTime.isBlank())
         {

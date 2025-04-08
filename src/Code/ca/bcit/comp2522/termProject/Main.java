@@ -72,7 +72,7 @@ final class Main
         System.out.println("\t-  Word Game (" + WORD_GAME.toUpperCase() + ")");
         System.out.println("\t-  Number Game (" + NUMBER_GAME.toUpperCase() + ")");
         //todo change game name once I know what it is
-        System.out.println("\t-  Tablut (" + MY_GAME.toUpperCase() + ")");
+        System.out.println("\t-  Tablut x Chess (" + MY_GAME.toUpperCase() + ")");
         System.out.println("\t-  Quit (" + QUIT.toUpperCase() + ")");
         System.out.println("Game choice: ");
     }

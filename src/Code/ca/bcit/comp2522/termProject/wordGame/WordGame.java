@@ -8,7 +8,11 @@ import java.util.Random;
 //todo javadoc
 
 /**
- * todo javadoc
+ * Allows users to play the word game.
+ * This is a game that asks the user questions about the world
+ * and keeps track of how well they are answering the
+ * questions.
+ *
  * @author Jonny Twist
  * @version 1.0
  */
@@ -100,8 +104,12 @@ public final class WordGame implements Playable
     }
 
     /*
-     * todo comment better and remove javadoc
-     * Loops 10 rounds of the word game and records results.
+     * Simulates 10 rounds of the word game, where each round tests the player's knowledge
+     * of countries and their capitals, and facts about countries.
+     *
+     * The method loops through each round, randomly selects a country and a round type,
+     * and then calls the appropriate method for that round type. The result of each round
+     * is recorded, and counters for correct and incorrect answers are updated accordingly.
      */
     private static void doTenRounds()
     {
@@ -156,7 +164,9 @@ public final class WordGame implements Playable
     }
 
     /*
-     * prints the total score of word game.
+     * Prints the current status of this session.
+     * Prints the number of games played, number of questions answered
+     * correctly in one attempt, two attempts, and neither attempt.
      */
     private static void reportTotalScore()
     {
@@ -169,7 +179,6 @@ public final class WordGame implements Playable
     }
 
     /*
-     * Does one round of:
      * The program will print a capital city, and ask the user what country it is the
      * capital of.
      * @param country the country that this round will use.
@@ -185,8 +194,6 @@ public final class WordGame implements Playable
         countryCapital = country.getCapitalCityName();
 
         System.out.println("NAME THE COUNTRY ROUND!");
-        //todo remove after test
-        System.out.println(answer);
         System.out.println("What is the country that has a capital named " + countryCapital + "?");
 
         roundResult = playRound(answer);
@@ -195,7 +202,6 @@ public final class WordGame implements Playable
     }
 
     /*
-     * Does one round of:
      * The program will print the country name, and ask the user what is its capital
      * city.
      * @param country the country that this round will use.
@@ -211,8 +217,6 @@ public final class WordGame implements Playable
         countryName = country.getName();
 
         System.out.println("NAME THE CAPITAL ROUND!");
-        //todo remove after test
-        System.out.println(answer);
         System.out.println("What is the capital of " + countryName + "?");
 
         roundResult = playRound(answer);
@@ -221,7 +225,6 @@ public final class WordGame implements Playable
     }
 
     /*
-     * Does one round of:
      * The program will print one of the three facts, and ask the user which country
      * is being described.
      * @param country the country that this round will use.
@@ -239,8 +242,6 @@ public final class WordGame implements Playable
         fact = country.getFacts()[chosenFact];
 
         System.out.println("FACT ROUND!");
-        //todo remove after test
-        System.out.println(answer);
         System.out.println(fact);
         System.out.println("What is the name of the country?");
 
