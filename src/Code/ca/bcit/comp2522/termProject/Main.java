@@ -8,15 +8,16 @@ import javafx.application.Platform;
 import java.util.Scanner;
 
 /**
- * todo update the javaDoc
- * Offers a menu (in the terminal; i.e. no GUI) in an infinite loop until the user presses
- * Q (or q):
- * Press W to play the Word game.
- * Press N to play the Number game.
- * Press M to play the <your game's name> game.
- * Press Q to quit.
- * If the user enters wrong data (not w, W, n, N, M, m, q, or Q), give an error message
- * and re-prompt.
+ * Main class that drives the program by allowing the user to choose and play different games.
+ * This class provides a terminal-based menu where users can select between multiple games.
+ * It runs in an infinite loop to keep prompting the user for input until they choose to quit by pressing 'Q'.
+ * Available game options:
+ * - Press 'W' to play the Word game.
+ * - Press 'N' to play the Number game.
+ * - Press 'M' to play a Tablut x Chess.
+ * - Press 'Q' to quit the application.
+ * If the user provides invalid input, the program will prompt again for a valid choice.
+ *
  * @author Jonny Twist
  * @version 1.0
  */
@@ -25,13 +26,16 @@ final class Main
 
     private static final String QUIT = "q";
     private static final String WORD_GAME = "w";
-    private static final String NUMBER_GAME = "n";
-    //todo maybe change name once I know what my game is
-    private static final String MY_GAME = "m";
+    private static final String NUMBER_GAME    = "n";
+    private static final String TABLUT_SPINOFF = "m";
 
     /*
-     * Gets and validates the users input for choice of game / quit.
-     * @return The user's choice of what they want to play.
+     * Collects and validates the user's input for game selection or quit option.
+     * Loops until the user enters a valid input (one of the predefined options).
+     *
+     * If the user enters an invalid choice, an error message is displayed and the user is prompted again.
+     *
+     * @return The user's input choice.
      */
     private static String getUserGameChoice()
     {
@@ -46,7 +50,7 @@ final class Main
         {
             if(userInput.equalsIgnoreCase(WORD_GAME)    ||
                userInput.equalsIgnoreCase(NUMBER_GAME)  ||
-               userInput.equalsIgnoreCase(MY_GAME)      ||
+               userInput.equalsIgnoreCase(TABLUT_SPINOFF)      ||
                userInput.equalsIgnoreCase(QUIT))
             {
                 validInput = true;
@@ -63,7 +67,9 @@ final class Main
     }
 
     /*
-     * Prompts the user to enter what game they want to play (or quit).
+     * Displays the game options to the user in the terminal.
+     * Prompts the user with a list of available games and the option to quit.
+     * This method provides an easy-to-read interface for game selection.
      */
     private static void promptGameChoice()
     {
@@ -71,14 +77,14 @@ final class Main
         System.out.println("What game would you like to play?");
         System.out.println("\t-  Word Game (" + WORD_GAME.toUpperCase() + ")");
         System.out.println("\t-  Number Game (" + NUMBER_GAME.toUpperCase() + ")");
-        //todo change game name once I know what it is
-        System.out.println("\t-  Tablut x Chess (" + MY_GAME.toUpperCase() + ")");
+        System.out.println("\t-  Tablut x Chess (" + TABLUT_SPINOFF.toUpperCase() + ")");
         System.out.println("\t-  Quit (" + QUIT.toUpperCase() + ")");
         System.out.println("Game choice: ");
     }
 
     /*
-     * Launches games.
+     * Launches a specified game based on the given game type class.
+     * This method is capable of launching any came that implements the Playable interface.
      * @param gameType the type of game we will try to launch.
      * @param <T> must implement the playable interface.
      */
@@ -125,7 +131,7 @@ final class Main
                 case NUMBER_GAME -> {
                     launchGame(NumberGame.class);
                 }
-                case MY_GAME -> {
+                case TABLUT_SPINOFF -> {
                     launchGame(TablutSpinoff.class);
                 }
                 case QUIT -> {

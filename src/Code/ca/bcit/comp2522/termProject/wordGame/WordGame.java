@@ -5,8 +5,6 @@ import ca.bcit.comp2522.termproject.Playable;
 import java.util.Scanner;
 import java.util.Random;
 
-//todo javadoc
-
 /**
  * Allows users to play the word game.
  * This is a game that asks the user questions about the world

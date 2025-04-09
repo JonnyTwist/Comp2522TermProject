@@ -9,9 +9,13 @@ import java.util.Scanner;
 import java.io.File;
 import java.io.FileNotFoundException;
 
-//todo javadoc
 /**
- * Used in the word game?
+ * This class initializes and populates a map of countries with associated
+ * capitals and facts by reading data from text files. It provides access to
+ * this data for use in game rounds in word game.
+ *
+ * @author Jonny Twist
+ * @version 1.0
  */
 final class World
 {
@@ -47,7 +51,14 @@ final class World
         countriesValues = new ArrayList<>(countries.values());
     }
 
-    //todo modularize?
+    /*
+     * Reads country data from text files and populates the provided map with
+     * country information, including country name, capital, and facts.
+     * It processes each text file named from 'a.txt' to 'z.txt', where each
+     * file contains data for multiple countries.
+     *
+     * @param countries the map to populate with country data.
+     */
     private static void fillCountiesIntoMap(final Map<String, Country> countries)
             throws FileNotFoundException
     {
@@ -80,8 +91,6 @@ final class World
                 final String countryFact3;
                 final Country countryToAdd;
 
-                //todo skip malformed data in here somewhere
-
                 countryAndCapital = countryAndCapitalOrBlank.split(":");
                 countryName = countryAndCapital[COUNTRY_INDEX];
                 countryCapital = countryAndCapital[CAPITAL_INDEX];
@@ -102,7 +111,4 @@ final class World
             fileScanner.close();
         }
     }
-    //todo close all scanners
-    // use System.lineSeperator() instead of \n
-
 }

@@ -6,3 +6,14 @@ trying this I eventually gave up and started making my own game from scratch. I 
 ideas from its attempt such as creating Piece and Position objects.
 
 Switched to ChatGPT:
+
+
+
+
+
+
+
+By the end of the term project I used chatGPT frequently to help me make my comments better. My experience getting
+comments from AI was far smoother than my experience getting code. It was still a little finicky having some comments
+run for many, many lines while some were only one line. It also used unusual notations which I thought made the comments
+a little harder to read, so I was frequently removing those.
