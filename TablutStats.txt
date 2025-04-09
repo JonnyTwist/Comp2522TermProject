@@ -1,2 +1,2 @@
-Attacker Wins: 5
-Defender Wins: 3
+Attacker Wins: 10
+Defender Wins: 6

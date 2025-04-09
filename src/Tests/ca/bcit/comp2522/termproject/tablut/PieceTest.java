@@ -3,7 +3,11 @@ package ca.bcit.comp2522.termproject.tablut;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 
 class PieceTest
 {
@@ -22,7 +26,7 @@ class PieceTest
     }
 
     @Test
-    void constructorValidation()
+    void testConstructorValidation()
     {
         IllegalArgumentException exception1 = assertThrows(
                 IllegalArgumentException.class, () -> new Pawn(null));
@@ -31,7 +35,7 @@ class PieceTest
     }
 
     @Test
-    void getOwnerPositive()
+    void testGetOwner()
     {
         assertEquals(Player.DEFENDER, p1.getOwner());
         assertEquals(Player.ATTACKER, p2.getOwner());
@@ -43,7 +47,7 @@ class PieceTest
     }
 
     @Test
-    void isKing()
+    void testIsKing()
     {
         assertFalse(p1.isKing());
         assertFalse(p2.isKing());

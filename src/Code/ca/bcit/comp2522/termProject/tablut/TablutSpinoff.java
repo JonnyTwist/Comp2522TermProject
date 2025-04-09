@@ -22,7 +22,9 @@ import javafx.scene.image.ImageView;
  * @author Jonny Twist
  * @version 1.0
  */
-public final class TablutSpinoff extends Application implements Playable
+public final class TablutSpinoff
+        extends Application
+        implements Playable
 {
     /*
      * Represents the movement pattern a piece can use.

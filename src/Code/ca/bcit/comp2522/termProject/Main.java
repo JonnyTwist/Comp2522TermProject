@@ -24,8 +24,8 @@ import java.util.Scanner;
 final class Main
 {
 
-    private static final String QUIT = "q";
-    private static final String WORD_GAME = "w";
+    private static final String QUIT           = "q";
+    private static final String WORD_GAME      = "w";
     private static final String NUMBER_GAME    = "n";
     private static final String TABLUT_SPINOFF = "m";
 

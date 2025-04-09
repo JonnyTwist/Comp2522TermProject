@@ -19,11 +19,6 @@ import javafx.scene.control.ButtonType;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 
-/*
-make at least one interface, one abstract class,
-and one concrete class.
- */
-
 /**
  * Allows users to play the number game.
  * Users must place 20 numbers in a non-decreasing order on a grid
@@ -36,39 +31,41 @@ public final class NumberGame
         implements Playable
 {
     private static final int NO_SUCCESSFUL_PLACEMENTS = 0;
-    private static final int NO_GAMES_LOST           = 0;
-    private static final int NO_GAMES_PLAYED         = 0;
-    private static final int SINGULAR                = 1;
-    private static final int DEFAULT_INT             = 0;
-    private static final int GRID_WIDTH              = 5;
-    private static final int GRID_HEIGHT             = 4;
-    private static final int BTN_SIZE_PX             = 100;
-    private static final int DEFAULT_WIDTH_PX        = 600;
-    private static final int DEFAULT_HEIGHT_PX       = 600;
-    private static final int MIN_NUM                 = 1;
-    private static final int MAX_NUM                 = 1001;
-    private static final int TOTAL_CHOSEN_NUMS       = 20;
-    private static final int STARTING_CHOSEN_SQUARES = 0;
-    private static final int STARTING_PREVIOUS       = 0;
-    private static final int FIRST_ITEM              = 0;
-    private static final int SINGLE_THREAD           = 1;
-    private static final int DEFAULT_PADDING_PX      = 10;
-    private static final String DEFAULT_BTN_TEXT     = "[ ]";
-    private static final String PLAY_AGAIN_TEXT      = "Play Again";
-    private static final String ACTIVE_BTN           = "active";
-    private static final String INACTIVE_BTN         = "inactive";
-    private static final String START_BTN_TXT        = "Start";
+    private static final int NO_GAMES_LOST            = 0;
+    private static final int NO_GAMES_PLAYED          = 0;
+    private static final int SINGULAR                 = 1;
+    private static final int DEFAULT_INT              = 0;
+    private static final int GRID_WIDTH               = 5;
+    private static final int GRID_HEIGHT              = 4;
+    private static final int BTN_SIZE_PX              = 100;
+    private static final int DEFAULT_WIDTH_PX         = 600;
+    private static final int DEFAULT_HEIGHT_PX        = 600;
+    private static final int MIN_NUM                  = 1;
+    private static final int MAX_NUM                  = 1001;
+    private static final int TOTAL_CHOSEN_NUMS        = 20;
+    private static final int STARTING_CHOSEN_SQUARES  = 0;
+    private static final int STARTING_PREVIOUS        = 0;
+    private static final int FIRST_ITEM               = 0;
+    private static final int SINGLE_THREAD            = 1;
+    private static final int DEFAULT_PADDING_PX       = 10;
 
-    private final int[] chosenNums;
-    private final Button[][] buttons;
-    private int              numChosenSquares;
-    private final Label      displayNextNum;
-    private final CountDownLatch latch;
-    private final int[] placedNums;
-    private int gamesPlayed;
-    private int gamesLost;
-    private int successfulPlacements;
+    private static final String DEFAULT_BTN_TEXT = "[ ]";
+    private static final String PLAY_AGAIN_TEXT  = "Play Again";
+    private static final String ACTIVE_BTN       = "active";
+    private static final String INACTIVE_BTN     = "inactive";
+    private static final String START_BTN_TXT    = "Start";
+
+    private int   numChosenSquares;
+    private int   gamesPlayed;
+    private int   gamesLost;
+    private int   successfulPlacements;
     private Stage primaryStage;
+
+    private final Label          displayNextNum;
+    private final CountDownLatch latch;
+    private final int[]          chosenNums;
+    private final Button[][]     buttons;
+    private final int[]          placedNums;
 
     /**
      * Constructor for a number game object.
@@ -311,8 +308,8 @@ public final class NumberGame
             }
             else
             {
-                checkLose();
                 displayNextNum.setText("Next number is: " + chosenNums[numChosenSquares]);
+                checkLose();
             }
         }
         else
@@ -408,7 +405,7 @@ public final class NumberGame
 
     /*
      * Disables all the buttons and requests an alert pop up.
-     * @param loseMessage the message thats passed to the pop up.
+     * @param loseMessage the message that's passed to the pop-up.
      */
     private void loseGame(final String loseMessage)
     {
@@ -460,7 +457,7 @@ public final class NumberGame
 
     /*
      * Creates a pop-up alert to show the final Score before the user exits.
-     * @param message the pop up message.
+     * @param message the pop-up message.
      */
     private void showFinalScore(final String message)
     {

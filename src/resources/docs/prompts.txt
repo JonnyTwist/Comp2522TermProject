@@ -6,14 +6,46 @@ trying this I eventually gave up and started making my own game from scratch. I 
 ideas from its attempt such as creating Piece and Position objects.
 
 Switched to ChatGPT:
+When I switched to ChatGPT the first thing I asked is if I should have a 2D array of buttons or Pieces. It
+initially recommended having a 2D array of pieces to keep track of the board state but then went back on itself
+changing this to Buttons. In the end I had a 2D array of Buttons to represent the frontend and a 2D array of
+Pieces to represent the backend.
 
+I later asked Chat how I could place images on the buttons so that my game would look a little less lame having only
+buttons with text on them. It was very descriptive on how to implement this which led to the implementation going
+very smoothly. Unfortunately it did not handle edge cases such as the expected Image not existing in the file system
+which was brought to my attention later with a great red wall of error messages.
 
+Sometimes I felt like my code could be written nicer or that it might be a little hard to understand (particularly
+the large if statements where I am placing the pieces for the beginning of the game). I tried to ask chatGPT for a
+cure for this, and it couldn't come up with anything better. I considered making more arrays of positions similar to
+what I did for the win positions but decided that probably wouldn't help.
 
+Something ChatGPT did have a perfect idea for was modularizing the bishop and rook movement by creating a method
+similar to checkDirection in the TablutSpinoff class. I knew I would be able to modularize the queens movement by
+just calling the rook and bishop movements but the checkDirection method was an absolute lifesaver when it came to
+making the movement for pieces.
 
-
-
+I also used chatGPT to style my Tablut game menu and instructions menu. I was having trouble thinking of
+ways to make that really stand out, and it also didn't seem all that important, but it does look a lot nicer after
+the update.
 
 By the end of the term project I used chatGPT frequently to help me make my comments better. My experience getting
 comments from AI was far smoother than my experience getting code. It was still a little finicky having some comments
 run for many, many lines while some were only one line. It also used unusual notations which I thought made the comments
 a little harder to read, so I was frequently removing those.
+
+Although it is nice to be able to code with AI I try to avoid it as much as possible because I (and others) are
+easily tempted to have it code for us instead of with us. The code it produces doesn't usually follow best practices
+(or at least I haven't been able to make it) which results in me needing to change a bunch of lines anyway. Another
+reason I avoid using AI is because I have already spent a lot of money for an education and it would be a waist
+if I didn't learn anything :).
+
+Now that im done roasting AI lets look at the bright side. ChatGPT was far quicker at generating simple methods then
+I would have been able to type them. It can also be useful to have a second perspective on the code I have written
+if it can be modularized easily or if there is simply something redundant in it. But as I said earlier it often
+doesn't follow best practices and can end up messing things up.
+
+Think thats about everything I used AI for as well as my thoughts on how it went.
+
+For the record prompts.txt was not made by AI :)

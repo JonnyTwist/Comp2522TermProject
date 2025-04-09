@@ -14,7 +14,8 @@ import java.util.Random;
  * @author Jonny Twist
  * @version 1.0
  */
-public final class WordGame implements Playable
+public final class WordGame
+        implements Playable
 {
     private static final int    INCORRECT_BOTH_TIMES = 2;
     private static final int    CORRECT_IN_ONE_GUESS = 0;

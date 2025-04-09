@@ -7,7 +7,6 @@ Lesson 2: IllegalArgumentExceptions in validator methods (ex: validateOwner in P
 
 Lesson 3: Abstract Piece Class + Final King/Pawn Class + Final TablutSpinoff Class
 
-
 Lesson 4: Playable Interface
 
 Lesson 5: Array in TablutSpinoff class
