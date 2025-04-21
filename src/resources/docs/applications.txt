@@ -17,6 +17,7 @@ Lesson 6: Static nested class Position in TablutSpinoff
 Lesson 7: Lambda expressions in TablutSpinoff
 
 Lesson 8: Streaming in TablutSpinoff
+          nio in TablutStats
 
 Lesson 9: Gui in TablutSpinoff
 
