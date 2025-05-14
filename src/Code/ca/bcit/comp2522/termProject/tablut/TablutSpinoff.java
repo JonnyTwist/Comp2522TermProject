@@ -26,24 +26,12 @@ public final class TablutSpinoff
         extends Application
         implements Playable
 {
-    /*
-     * Represents the movement pattern a piece can use.
-     * These mimic chess-style movements and can be used to
-     * configure how pieces are allowed to move on the board.
-     */
-    private enum Movement {
-        KNIGHT,
-        BISHOP,
-        ROOK,
-        QUEEN
-    }
-
     static Player currentMove = Player.DEFENDER;
 
     static final         int BTN_SIZE_PX             = 75;
     private static final int DEFAULT_SCENE_WIDTH_PX  = 675;
     private static final int DEFAULT_SCENE_HEIGHT_PX = 750;
-    private static final int BOARD_SIZE              = 9;
+    static final int BOARD_SIZE              = 9;
     private static final int OFFSET_ONE              = 1;
     private static final int OFFSET_TWO              = 2;
     private static final int HALF                    = 2;
@@ -53,23 +41,23 @@ public final class TablutSpinoff
     private static final int BISHOP_SELECT_BOUND = 9;
     private static final int MOVE_SELECT_BOUND   = 10;
 
-    private static final int UP          = -1;
-    private static final int DOWN        = 1;
-    private static final int RIGHT       = 1;
-    private static final int LEFT        = -1;
-    private static final int NO_MOVEMENT = 0;
+    static final int UP          = -1;
+    static final int DOWN        = 1;
+    static final int RIGHT       = 1;
+    static final int LEFT        = -1;
+    static final int NO_MOVEMENT = 0;
 
     private static final int LEFT_CENTER_COL;
-    private static final int CENTER_COL;
+    static final int CENTER_COL;
     private static final int RIGHT_CENTER_COL;
     private static final int TOP_CENTER_ROW;
-    private static final int CENTER_ROW;
+    static final int CENTER_ROW;
     private static final int BOTTOM_CENTER_ROW;
-    private static final int FIRST_COL  = 0;
-    private static final int FIRST_ROW  = 0;
+    static final int FIRST_COL  = 0;
+    static final int FIRST_ROW  = 0;
     private static final int SECOND_COL = 1;
-    private static final int LAST_COL;
-    private static final int LAST_ROW;
+    static final int LAST_COL;
+    static final int LAST_ROW;
     private static final int SECOND_LAST_COL;
 
 
@@ -77,7 +65,7 @@ public final class TablutSpinoff
     private static final String SELECTED    = "selectedPiece";
     private static final String LIGHT       = "lightTile";
     private static final String DARK        = "darkTile";
-    private static final String RESTRICTED  = "noAccessTile";
+    static final String RESTRICTED  = "noAccessTile";
     private static final String WIN_TILE    = "winTile";
     private static final String THIS_MOVE   = "This Move: ";
     private static final String NEXT_MOVE   = "Next Move: ";
@@ -111,6 +99,8 @@ public final class TablutSpinoff
     private static Position lastClickedPos;
     private static Movement thisMove;
     private static Movement nextMove;
+
+    private static boolean singlePlayer = false;
 
     static
     {
@@ -213,7 +203,8 @@ public final class TablutSpinoff
      */
     private static Scene createMenuScene()
     {
-        final Button startButton;
+        final Button twoPlayBtn;
+        final Button singlePlayBtn;
         final Button instructionsButton;
         final Label titleLabel;
         final VBox layout;
@@ -222,18 +213,27 @@ public final class TablutSpinoff
         titleLabel = new Label("2 player\nTablut x Chess");
         titleLabel.getStyleClass().add("menuTitle");
 
-        startButton = new Button("Start Game");
+        singlePlayBtn = new Button("Single Player");
+        twoPlayBtn = new Button("Start Game");
         instructionsButton = new Button("Instructions");
 
-        startButton.getStyleClass().add(MENU_BTN_STYLE);
+        singlePlayBtn.getStyleClass().add(MENU_BTN_STYLE);
+        twoPlayBtn.getStyleClass().add(MENU_BTN_STYLE);
         instructionsButton.getStyleClass().add(MENU_BTN_STYLE);
 
-        layout = new VBox(titleLabel, startButton, instructionsButton);
+        layout = new VBox(titleLabel, singlePlayBtn, twoPlayBtn, instructionsButton);
         layout.getStyleClass().add("menuLayout");
 
         scene = new Scene(layout, DEFAULT_SCENE_WIDTH_PX, DEFAULT_SCENE_HEIGHT_PX);
 
-        startButton.setOnAction(e -> {
+        twoPlayBtn.setOnAction(e -> {
+            singlePlayer = false;
+            prepareGameScene();
+            stage.setScene(GAME_SCENE);
+        });
+
+        singlePlayBtn.setOnAction(e -> {
+            singlePlayer = true;
             prepareGameScene();
             stage.setScene(GAME_SCENE);
         });
@@ -686,7 +686,7 @@ public final class TablutSpinoff
      * Creates an array of the valid moves a knight can make.
      * @return the valid knight moves.
      */
-    private static int[][] getKnightMoves()
+    static int[][] getKnightMoves()
     {
         final int[][] knightMoves;
         knightMoves = new int[][] {
@@ -821,6 +821,13 @@ public final class TablutSpinoff
 
         PIECES[newPos.row][newPos.col] = piece;
         updateButtonImage(btn, piece);
+
+        if (currentMove == Player.DEFENDER && singlePlayer)
+        {
+            AI.makeMove(BOARD, PIECES, thisMove, nextMove);
+            updatePlayerTurn();
+            //todo make a new check for win condition for AI checking if a King exists
+        }
 
         updatePlayerTurn();
         clearSelectColors();
